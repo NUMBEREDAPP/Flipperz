@@ -19,18 +19,20 @@
       padding: 32px 0;
       text-align: center;
     }
-    .logo {
-      width: 180px;
-      margin: 0 auto 20px;
-    }
     h1 {
-      display: none;
+      font-size: 2em;
+      font-weight: 700;
+      margin-bottom: 4px;
     }
     .subtitle {
-      display: none;
+      font-size: 1em;
+      font-weight: 400;
+      color: #888;
+      margin-bottom: 20px;
     }
     input[type="text"] {
-      width: 100%;
+      width: 80%;
+      max-width: 600px;
       padding: 14px;
       font-size: 1em;
       border: none;
@@ -39,6 +41,8 @@
       background: #1c1c1c;
       color: white;
       box-sizing: border-box;
+      margin: 0 auto;
+      display: block;
     }
     button {
       display: inline-block;
@@ -80,7 +84,6 @@
     }
     .result-text {
       flex: 1;
-      text-align: left;
     }
     .result-text strong {
       font-weight: 700;
@@ -134,7 +137,7 @@
 </head>
 <body>
   <div class="container">
-    <img src="flipperz-logo.png" alt="Flipperz Logo" style="width: 160px; height: auto; margin-bottom: 12px;" />
+    <img src="flipperz-logo.png" alt="Flipperz Logo" style="width: 220px; height: auto; margin-bottom: 16px;" />
     <input id="searchInput" type="text" placeholder="Search any card, set, or product" />
     <br />
     <button onclick="runSearch()">Search eBay Sold Listings</button>
@@ -184,7 +187,6 @@
         if (idx >= showCount) return;
         const priceEl = item.querySelector('.s-item__price');
         const titleEl = item.querySelector('.s-item__title');
-        const dateEl = item.querySelector('.s-item__title--tagblock span');
         const imgEl = item.querySelector('img');
         const priceMatch = priceEl?.textContent.match(/\$([\d,\.]+)/);
         const price = priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : null;
@@ -208,7 +210,6 @@
         const text = document.createElement('div');
         text.className = 'result-text';
         text.innerHTML = `<strong>$${price.toFixed(2)}</strong><br>${titleEl.textContent}`;
-        if (dateEl) text.innerHTML += `<br><small>${dateEl.textContent}</small>`;
 
         const img = document.createElement('img');
         img.src = imgEl?.src?.replace(/s-l\d+/, 's-l1000') || imgEl?.src;
