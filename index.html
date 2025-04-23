@@ -3,43 +3,132 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FLIPPERz Comp Tool - By NUMBERED</title>
+  <title>FLIPPERz Comp Tool – By NUMBERED</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; padding: 10px; background: #f5f5f5; color: #222; margin: 0; }
-    .container { max-width: 720px; margin: auto; background: #fff; padding: 16px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    input[type=text] { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; box-sizing: border-box; }
-    button { padding: 10px 16px; background: #1976d2; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 20px; font-size: 1em; }
-    button:hover { background: #125aa3; }
-    .result-item { background: #eaf4ff; border: 1px solid #ddd; padding: 12px; margin-bottom: 12px; border-radius: 6px; display: flex; align-items: flex-start; gap: 10px; font-size: 1em; flex-wrap: wrap; cursor: pointer; }
-    .result-item img { height: 100px; width: auto; border-radius: 4px; object-fit: contain; pointer-events: none; }
-    .result-text { flex: 1; min-width: 0; }
-    .result-text small { color: #777; font-size: 0.85em; display: block; margin-top: 4px; }
-    .slider-container { margin-top: 20px; margin-bottom: 20px; text-align: center; display: none; }
-    .slider-container input[type=range] { width: 100%; max-width: 300px; height: 30px; }
-    .slider-labels { display: flex; justify-content: space-between; max-width: 300px; margin: 4px auto 8px; font-size: 0.8em; color: #666; }
-    .output { font-weight: bold; font-size: 1.4em; margin-top: 12px; text-align: center; color: #2c3e50; }
-    .quick-buttons { margin-top: 10px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-    .quick-buttons button { background: #ddd; padding: 8px 14px; border: none; border-radius: 5px; cursor: pointer; }
-    .quick-buttons button:hover { background: #ccc; }
-    .clear-btn { background: #666; color: #fff; }
-    #showMoreBtn { display: none; margin: 0 auto 20px; padding: 10px 15px; border: 1px solid #888; background: #f8f8f8; border-radius: 6px; cursor: pointer; }
-    .badge { font-size: 0.75em; color: white; background: #444; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
-    .badge.bin { background: #4caf50; }
-    .badge.auction { background: #f57c00; }
-    .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); justify-content: center; align-items: center; z-index: 9999; }
-    .lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; }
-    .result-item.selected { background: #cde8ff; border-color: #1976d2; }
-    .result-item input[type="checkbox"] { display: none; }
-    @media (max-width: 480px) {
-      .result-item { flex-direction: column; }
-      .output { font-size: 1.1em; }
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: #0a0a0a;
+      color: white;
+      margin: 0;
+      padding: 0 16px;
+    }
+    .container {
+      max-width: 720px;
+      margin: auto;
+      padding: 32px 0;
+    }
+    h1 {
+      font-size: 1.8em;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: white;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 14px;
+      font-size: 1em;
+      border: none;
+      border-radius: 28px;
+      outline: none;
+      background: #1c1c1c;
+      color: white;
+    }
+    button {
+      display: inline-block;
+      padding: 10px 24px;
+      margin-top: 12px;
+      background: #00cc6a;
+      color: black;
+      font-weight: 600;
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    button:hover {
+      background: #00b25b;
+    }
+    .result-item {
+      background: #161616;
+      border: 1px solid #2c2c2c;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .result-item.selected {
+      background: #222;
+      border-color: #00cc6a;
+    }
+    .result-item img {
+      width: 80px;
+      height: auto;
+      border-radius: 8px;
+      object-fit: contain;
+      pointer-events: none;
+    }
+    .result-text {
+      flex: 1;
+    }
+    .result-text strong {
+      font-weight: 700;
+      font-size: 1em;
+      display: block;
+    }
+    .result-text small {
+      color: #999;
+      display: block;
+      font-size: 0.85em;
+    }
+    .slider-container {
+      margin-top: 20px;
+      text-align: center;
+    }
+    input[type="range"] {
+      width: 100%;
+      max-width: 300px;
+    }
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      max-width: 300px;
+      margin: 4px auto 8px;
+      font-size: 0.8em;
+      color: #888;
+    }
+    .quick-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 10px 0;
+    }
+    .quick-buttons button {
+      background: #2c2c2c;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 0.9em;
+    }
+    .quick-buttons button:hover {
+      background: #444;
+    }
+    .output {
+      font-size: 1.2em;
+      margin-top: 10px;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>FLIPPERz Comp Tool – By NUMBERED</h1>
-    <input id="searchInput" type="text" placeholder="Try: Chandler Simpson /499 auto" />
+    <input id="searchInput" type="text" placeholder="Search any card, any set" />
     <button onclick="runSearch()">Search eBay Sold Listings</button>
 
     <div class="slider-container" id="sliderWrap">
@@ -51,17 +140,12 @@
       <div class="quick-buttons">
         <button onclick="setSlider(80)">80%</button>
         <button onclick="setSlider(90)">90%</button>
-        <button class="clear-btn" onclick="clearSelections()">Clear Selections</button>
+        <button onclick="clearSelections()">Clear</button>
       </div>
       <div class="output" id="offerOutput">Select comps to calculate average.</div>
     </div>
 
     <div id="results"></div>
-    <div id="showMoreBtn" onclick="showMoreResults()">Show More Results</div>
-  </div>
-
-  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-    <img id="lightboxImg" src="" alt="Zoomed Image" />
   </div>
 
   <script>
@@ -93,11 +177,6 @@
         const priceEl = item.querySelector('.s-item__price');
         const titleEl = item.querySelector('.s-item__title');
         const imgEl = item.querySelector('img');
-        const dateEl = item.querySelector('.s-item__title--tagblock span');
-        const subtitle = item.querySelector('.s-item__subtitle')?.textContent.toLowerCase();
-        const isBin = subtitle?.includes('buy it now');
-        const isAuction = subtitle?.includes('auction');
-
         const priceMatch = priceEl?.textContent.match(/\$([\d,\.]+)/);
         const price = priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : null;
         if (!price || !titleEl || titleEl.textContent.includes('Shop on eBay')) return;
@@ -109,25 +188,20 @@
         checkbox.type = 'checkbox';
         checkbox.checked = false;
         checkbox.dataset.price = price;
+        checkbox.style.display = 'none';
 
-        row.addEventListener('click', e => {
-          if (e.target.tagName !== 'IMG') {
-            checkbox.checked = !checkbox.checked;
-            row.classList.toggle('selected', checkbox.checked);
-            updateOfferCalc();
-          }
+        row.addEventListener('click', () => {
+          checkbox.checked = !checkbox.checked;
+          row.classList.toggle('selected', checkbox.checked);
+          updateOfferCalc();
         });
 
         const text = document.createElement('div');
         text.className = 'result-text';
         text.innerHTML = `<strong>$${price.toFixed(2)}</strong><br>${titleEl.textContent}`;
-        if (isBin) text.innerHTML += ' <span class="badge bin">BIN</span>';
-        if (isAuction) text.innerHTML += ' <span class="badge auction">Auction</span>';
-        if (dateEl) text.innerHTML += `<small>${dateEl.textContent}</small>`;
 
         const img = document.createElement('img');
-        const large = imgEl?.getAttribute('data-src') || imgEl?.src?.replace(/s-l\d+/, 's-l1000');
-        img.src = large;
+        img.src = imgEl?.src?.replace(/s-l\d+/, 's-l1000') || imgEl?.src;
 
         row.appendChild(checkbox);
         row.appendChild(img);
@@ -137,15 +211,12 @@
         allPrices.push({ el: checkbox, price, row });
       });
 
-      const sliderWrap = document.getElementById('sliderWrap');
       if (allPrices.length > 0) {
-        sliderWrap.style.display = 'block';
+        document.getElementById('sliderWrap').style.display = 'block';
         updateOfferCalc();
-        document.getElementById('showMoreBtn').style.display = (allRawItems.length > showCount) ? 'block' : 'none';
       } else {
-        sliderWrap.style.display = 'none';
-        document.getElementById('showMoreBtn').style.display = 'none';
-        results.innerHTML = '<p>No results with valid prices found.</p>';
+        document.getElementById('sliderWrap').style.display = 'none';
+        results.innerHTML = '<p style="color:#888; text-align:center;">No valid results found.</p>';
       }
     }
 
@@ -174,20 +245,6 @@
         p.row.classList.remove('selected');
       });
       updateOfferCalc();
-    }
-
-    function showLightbox(src) {
-      document.getElementById('lightboxImg').src = src;
-      document.getElementById('lightbox').style.display = 'flex';
-    }
-
-    function closeLightbox() {
-      document.getElementById('lightbox').style.display = 'none';
-    }
-
-    function showMoreResults() {
-      showCount += 10;
-      renderResults();
     }
   </script>
 </body>
