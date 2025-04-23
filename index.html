@@ -166,7 +166,7 @@
     <button onclick="runSearch()">Search eBay Sold Listings</button>
 
     <div class="slider-container" id="sliderWrap">
-      <label for="slider">Adjust Offer %:</label><br />
+      <label for="slider">Adjust Offer %: <span id="sliderDisplay">80%</span></label><br />
       <input type="range" id="slider" min="60" max="100" step="5" value="80" oninput="updateOfferCalc()" />
       <div class="slider-ticks"></div>
       <div class="slider-labels">
@@ -207,6 +207,8 @@
       const slider = document.getElementById('slider');
       const val = parseInt(slider.value);
       document.getElementById('sliderValue').textContent = `${val}%`;
+      document.getElementById('sliderDisplay').textContent = `${val}%`;
+    }%`;
     }
 
     function setSlider(val) {
