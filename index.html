@@ -141,6 +141,24 @@
       cursor: pointer;
       margin-top: 8px;
     }
+    .result-item {
+      display: flex;
+      align-items: center;
+      background: #111;
+      padding: 12px;
+      border-radius: 12px;
+      margin: 12px 0;
+      gap: 16px;
+    }
+    .result-item img {
+      width: 80px;
+      height: auto;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .result-text {
+      text-align: left;
+    }
   </style>
 </head>
 <body>
@@ -233,28 +251,41 @@
         return;
       }
 
-      const sampleData = [
-        { price: 143, title: 'Chandler Simpson /499 Auto', date: 'Apr 15, 2025', img: 'https://via.placeholder.com/100' },
-        { price: 160, title: 'Chandler Simpson Gold Refractor Auto /50', date: 'Apr 14, 2025', img: 'https://via.placeholder.com/100' },
-        { price: 135, title: 'Chandler Simpson Base Chrome Auto', date: 'Apr 13, 2025', img: 'https://via.placeholder.com/100' }
-      ];
+      fetch(`https://corsproxy.io/?https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.13.0&SECURITY-APPNAME=YOUR_APP_ID_HERE&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=${encodeURIComponent(query)}&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true&sortOrder=EndTimeSoonest`)
+        .then(res => res.json())
+        .then(data => {
+          const items = data.findCompletedItemsResponse?.[0]?.searchResult?.[0]?.item || [];
+          if (!items.length) {
+            results.innerHTML = '<p style="color:#888;">No sold results found.</p>';
+            return;
+          }
 
-      let html = '';
-      sampleData.forEach(item => {
-        html += `
-          <div class="result-item">
-            <input type="checkbox" data-price="${item.price}" onchange="updateOfferCalc()" />
-            <img src="${item.img}" alt="Card" class="expand-img" onclick="showImagePopup('${item.img}')" />
-            <div class="result-text">
-              <strong>$${item.price.toFixed(2)}</strong><br />${item.title}<br />
-              <small>Sold: ${item.date}</small>
-            </div>
-          </div>
-        `;
-      });
+          let html = '';
+          items.slice(0, 10).forEach(item => {
+            const price = parseFloat(item.sellingStatus[0].currentPrice[0].__value__);
+            const title = item.title[0];
+            const img = item.galleryURL?.[0] || 'https://via.placeholder.com/100';
+            const date = new Date(item.listingInfo[0].endTime[0]).toDateString();
 
-      results.innerHTML = html;
-      updateOfferCalc();
+            html += `
+              <div class="result-item">
+                <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
+                <img src="${img}" alt="Card" class="expand-img" onclick="showImagePopup('${img}')" />
+                <div class="result-text">
+                  <strong>$${price.toFixed(2)}</strong><br />${title}<br />
+                  <small>Sold: ${date}</small>
+                </div>
+              </div>
+            `;
+          });
+
+          results.innerHTML = html;
+          updateOfferCalc();
+        })
+        .catch(err => {
+          console.error(err);
+          results.innerHTML = '<p style="color:#f66;">Error fetching eBay results.</p>';
+        });
     }
   </script>
 </body>
