@@ -15,11 +15,12 @@
     .result-text { flex: 1; min-width: 0; }
     .result-text small { color: #777; font-size: 0.85em; display: block; margin-top: 4px; }
     .slider-container { margin-top: 20px; margin-bottom: 20px; text-align: center; display: none; }
-    .output { font-weight: bold; font-size: 1.2em; margin-top: 12px; text-align: center; color: #2c3e50; word-wrap: break-word; }
+    .slider-container input[type=range] { width: 100%; max-width: 300px; height: 30px; }
+    .output { font-weight: bold; font-size: 1.4em; margin-top: 12px; text-align: center; color: #2c3e50; word-wrap: break-word; }
     #showMoreBtn { display: none; margin: 0 auto 20px; padding: 10px 15px; border: 1px solid #888; background: #f8f8f8; border-radius: 6px; cursor: pointer; text-align: center; }
     #showMoreBtn:hover { background: #e0e0e0; }
     .quick-buttons { margin-top: 8px; display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
-    .quick-buttons button { background: #ddd; color: #333; font-size: 0.95em; }
+    .quick-buttons button { background: #ddd; color: #333; font-size: 0.95em; padding: 8px 14px; }
     .quick-buttons button:hover { background: #ccc; }
     .badge { font-size: 0.75em; color: white; background: #444; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
     .badge.bin { background: #4caf50; }
@@ -44,7 +45,7 @@
 
     <div class="slider-container" id="sliderWrap">
       <label for="slider">Adjust Offer %:</label><br>
-      <input type="range" id="slider" min="60" max="100" value="80" oninput="updateOfferCalc()">
+      <input type="range" id="slider" min="60" max="100" step="5" value="80" oninput="updateOfferCalc()">
       <div class="quick-buttons">
         <button onclick="setSlider(80)">80%</button>
         <button onclick="setSlider(90)">90%</button>
@@ -55,138 +56,137 @@
 
     <div id="results"></div>
     <div id="showMoreBtn" onclick="showMoreResults()">Show More Results</div>
-  </div>
 
-  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-    <img id="lightboxImg" src="" alt="Zoomed Image">
-  </div>
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+      <img id="lightboxImg" src="" alt="Zoomed Image">
+    </div>
 
-  <script>
-    let allPrices = [];
-    let allRawItems = [];
-    let showCount = 10;
+    <script>
+      let allPrices = [];
+      let allRawItems = [];
+      let showCount = 10;
 
-    function runSearch() {
-      const query = document.getElementById('searchInput').value.trim();
-      if (!query) return alert("Enter a search term.");
+      function runSearch() {
+        const query = document.getElementById('searchInput').value.trim();
+        if (!query) return alert("Enter a search term.");
 
-      const url = `https://corsproxy.io/?https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(query)}&_sop=13&LH_Sold=1&LH_Complete=1`;
+        const url = `https://corsproxy.io/?https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(query)}&_sop=13&LH_Sold=1&LH_Complete=1`;
 
-      fetch(url)
-        .then(r => r.text())
-        .then(html => {
-          const doc = new DOMParser().parseFromString(html, 'text/html');
-          allRawItems = [...doc.querySelectorAll('li.s-item')];
-          renderResults();
-        })
-        .catch(err => alert("Failed to load eBay results."));
-    }
+        fetch(url)
+          .then(r => r.text())
+          .then(html => {
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            allRawItems = [...doc.querySelectorAll('li.s-item')];
+            renderResults();
+          })
+          .catch(err => alert("Failed to load eBay results."));
+      }
 
-    function renderResults() {
-      const results = document.getElementById('results');
-      results.innerHTML = '';
-      allPrices = [];
+      function renderResults() {
+        const results = document.getElementById('results');
+        results.innerHTML = '';
+        allPrices = [];
 
-      allRawItems.forEach((item, idx) => {
-        if (idx >= showCount) return;
+        allRawItems.forEach((item, idx) => {
+          if (idx >= showCount) return;
 
-        const priceEl = item.querySelector('.s-item__price');
-        const titleEl = item.querySelector('.s-item__title');
-        const imgEl = item.querySelector('img');
-        const dateEl = item.querySelector('.s-item__title--tagblock span');
-        const priceMatch = priceEl?.textContent.match(/\$([\d,\.]+)/);
-        const price = priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : null;
-        const subtitle = item.querySelector('.s-item__subtitle')?.textContent.toLowerCase();
-        const isBin = subtitle?.includes('buy it now');
-        const isAuction = subtitle?.includes('auction');
+          const priceEl = item.querySelector('.s-item__price');
+          const titleEl = item.querySelector('.s-item__title');
+          const imgEl = item.querySelector('img');
+          const dateEl = item.querySelector('.s-item__title--tagblock span');
+          const priceMatch = priceEl?.textContent.match(/\$([\d,\.]+)/);
+          const price = priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : null;
+          const subtitle = item.querySelector('.s-item__subtitle')?.textContent.toLowerCase();
+          const isBin = subtitle?.includes('buy it now');
+          const isAuction = subtitle?.includes('auction');
 
-        if (price && titleEl && !titleEl.textContent.includes('Shop on eBay')) {
-          const row = document.createElement('div');
-          row.className = 'result-item';
+          if (price && titleEl && !titleEl.textContent.includes('Shop on eBay')) {
+            const row = document.createElement('div');
+            row.className = 'result-item';
 
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.checked = false;
-          checkbox.onchange = updateOfferCalc;
-          checkbox.dataset.price = price;
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = false;
+            checkbox.onchange = updateOfferCalc;
+            checkbox.dataset.price = price;
 
-          const textDiv = document.createElement('div');
-          textDiv.className = 'result-text';
-          let titleLine = `<strong>$${price.toFixed(2)}</strong><br>${titleEl.textContent}`;
-          if (isBin) titleLine += ' <span class="badge bin">BIN</span>';
-          if (isAuction) titleLine += ' <span class="badge auction">Auction</span>';
+            const textDiv = document.createElement('div');
+            textDiv.className = 'result-text';
+            let titleLine = `<strong>$${price.toFixed(2)}</strong><br>${titleEl.textContent}`;
+            if (isBin) titleLine += ' <span class="badge bin">BIN</span>';
+            if (isAuction) titleLine += ' <span class="badge auction">Auction</span>';
 
-          textDiv.innerHTML = titleLine;
-          if (dateEl) textDiv.innerHTML += `<small>${dateEl.textContent}</small>`;
+            textDiv.innerHTML = titleLine;
+            if (dateEl) textDiv.innerHTML += `<small>${dateEl.textContent}</small>`;
 
-          row.appendChild(checkbox);
-          const img = document.createElement('img');
-          const largeImg = imgEl?.getAttribute('data-src') || imgEl?.src?.replace(/s-l\d+/, 's-l1000');
-          img.src = largeImg;
-          img.onclick = () => showLightbox(largeImg);
-          row.appendChild(img);
+            row.appendChild(checkbox);
+            const img = document.createElement('img');
+            const largeImg = imgEl?.getAttribute('data-src') || imgEl?.src?.replace(/s-l\d+/, 's-l1000');
+            img.src = largeImg;
+            img.onclick = () => showLightbox(largeImg);
+            row.appendChild(img);
 
-          row.appendChild(textDiv);
-          results.appendChild(row);
+            row.appendChild(textDiv);
+            results.appendChild(row);
 
-          allPrices.push({ el: checkbox, price });
+            allPrices.push({ el: checkbox, price });
+          }
+        });
+
+        const sliderWrap = document.getElementById('sliderWrap');
+        if (allPrices.length > 0) {
+          sliderWrap.style.display = 'block';
+          document.getElementById('showMoreBtn').style.display = (allRawItems.length > showCount) ? 'block' : 'none';
+          updateOfferCalc();
+          const resultsContainer = document.getElementById('results');
+          resultsContainer.parentNode.insertBefore(sliderWrap, resultsContainer);
+        } else {
+          sliderWrap.style.display = 'none';
+          document.getElementById('showMoreBtn').style.display = 'none';
+          results.innerHTML = '<p>No results with valid prices found.</p>';
         }
-      });
+      }
 
-      const sliderWrap = document.getElementById('sliderWrap');
-      if (allPrices.length > 0) {
-        sliderWrap.style.display = 'block';
-        document.getElementById('showMoreBtn').style.display = (allRawItems.length > showCount) ? 'block' : 'none';
+      function showMoreResults() {
+        showCount += 10;
+        renderResults();
+      }
+
+      function updateOfferCalc() {
+        const sliderVal = parseInt(document.getElementById('slider').value);
+        const selected = allPrices.filter(p => p.el.checked);
+        const prices = selected.map(p => p.price);
+
+        const output = document.getElementById('offerOutput');
+
+        if (prices.length === 0) {
+          output.textContent = 'Select comps to calculate average.';
+          return;
+        }
+
+        const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
+        const offer = (avg * sliderVal / 100).toFixed(2);
+        output.textContent = `Average of ${prices.length} comps: $${avg.toFixed(2)} → ${sliderVal}% Offer: $${offer}`;
+      }
+
+      function setSlider(val) {
+        document.getElementById('slider').value = val;
         updateOfferCalc();
-        const resultsContainer = document.getElementById('results');
-        resultsContainer.parentNode.insertBefore(sliderWrap, resultsContainer);
-      } else {
-        sliderWrap.style.display = 'none';
-        document.getElementById('showMoreBtn').style.display = 'none';
-        results.innerHTML = '<p>No results with valid prices found.</p>';
-      }
-    }
-
-    function showMoreResults() {
-      showCount += 10;
-      renderResults();
-    }
-
-    function updateOfferCalc() {
-      const sliderVal = parseInt(document.getElementById('slider').value);
-      const selected = allPrices.filter(p => p.el.checked);
-      const prices = selected.map(p => p.price);
-
-      const output = document.getElementById('offerOutput');
-
-      if (prices.length === 0) {
-        output.textContent = 'Select comps to calculate average.';
-        return;
       }
 
-      const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
-      const offer = (avg * sliderVal / 100).toFixed(2);
-      output.textContent = `Average of ${prices.length} comps: $${avg.toFixed(2)} → ${sliderVal}% Offer: $${offer}`;
-    }
+      function clearSelections() {
+        allPrices.forEach(p => p.el.checked = false);
+        updateOfferCalc();
+      }
 
-    function setSlider(val) {
-      document.getElementById('slider').value = val;
-      updateOfferCalc();
-    }
+      function showLightbox(src) {
+        document.getElementById('lightboxImg').src = src;
+        document.getElementById('lightbox').style.display = 'flex';
+      }
 
-    function clearSelections() {
-      allPrices.forEach(p => p.el.checked = false);
-      updateOfferCalc();
-    }
-
-    function showLightbox(src) {
-      document.getElementById('lightboxImg').src = src;
-      document.getElementById('lightbox').style.display = 'flex';
-    }
-
-    function closeLightbox() {
-      document.getElementById('lightbox').style.display = 'none';
-    }
-  </script>
+      function closeLightbox() {
+        document.getElementById('lightbox').style.display = 'none';
+      }
+    </script>
 </body>
 </html>
