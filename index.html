@@ -265,12 +265,12 @@
             const price = parseFloat(item.sellingStatus[0].currentPrice[0].__value__);
             const title = item.title[0];
             const img = item.galleryURL?.[0] || 'https://via.placeholder.com/100';
-            const date = new Date(item.listingInfo[0].endTime[0]).toDateString();
+            const date = new Date(item.listingInfo[0].endTime[0]).toLocaleDateString();
 
             html += `
               <div class="result-item">
                 <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
-                <img src="${img}" alt="Card" class="expand-img" onclick="showImagePopup('${img}')" />
+                <img src="${img}" alt="Card" onclick="showImagePopup('${img}')" />
                 <div class="result-text">
                   <strong>$${price.toFixed(2)}</strong><br />${title}<br />
                   <small>Sold: ${date}</small>
