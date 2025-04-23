@@ -20,8 +20,8 @@
       text-align: center;
     }
     .header-logo {
-      width: 240px;
-      margin: 0 auto 12px auto;
+      width: 260px;
+      margin: 0 auto 20px auto;
       display: block;
     }
     input[type="text"] {
@@ -38,7 +38,7 @@
     button {
       display: inline-block;
       padding: 10px 24px;
-      margin: 16px auto;
+      margin-top: 16px;
       background: #00cc6a;
       color: black;
       font-weight: 600;
@@ -105,7 +105,8 @@
     .quick-buttons {
       display: flex;
       justify-content: center;
-      gap: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
       margin: 10px 0;
     }
     .quick-buttons button {
@@ -128,7 +129,7 @@
 </head>
 <body>
   <div class="container">
-    <img src="/mnt/data/2c6ea2df-d31b-4c7e-9a8a-fcbb6ac98cfb.png" alt="Flipperz Logo" class="header-logo">
+    <img src="/mnt/data/d44b71b5-b5a1-48df-83ef-6c5ba190d29a.png" alt="Flipperz Logo" class="header-logo">
     <input id="searchInput" type="text" placeholder="Search any card, set, or product" />
     <br />
     <button onclick="runSearch()">Search eBay Sold Listings</button>
