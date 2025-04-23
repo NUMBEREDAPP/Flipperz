@@ -10,8 +10,8 @@
     input[type=text] { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; box-sizing: border-box; }
     button { padding: 10px 16px; background: #1976d2; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 20px; font-size: 1em; }
     button:hover { background: #125aa3; }
-    .result-item { background: #eaf4ff; border: 1px solid #ddd; padding: 12px; margin-bottom: 12px; border-radius: 6px; display: flex; align-items: flex-start; gap: 10px; font-size: 1em; flex-wrap: wrap; }
-    .result-item img { height: 100px; width: auto; border-radius: 4px; cursor: zoom-in; object-fit: contain; }
+    .result-item { background: #eaf4ff; border: 1px solid #ddd; padding: 12px; margin-bottom: 12px; border-radius: 6px; display: flex; align-items: flex-start; gap: 10px; font-size: 1em; flex-wrap: wrap; cursor: pointer; }
+    .result-item img { height: 100px; width: auto; border-radius: 4px; object-fit: contain; pointer-events: none; }
     .result-text { flex: 1; min-width: 0; }
     .result-text small { color: #777; font-size: 0.85em; display: block; margin-top: 4px; }
     .slider-container { margin-top: 20px; margin-bottom: 20px; text-align: center; display: none; }
@@ -28,6 +28,8 @@
     .badge.auction { background: #f57c00; }
     .lightbox { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.9); justify-content: center; align-items: center; z-index: 9999; }
     .lightbox img { max-width: 90%; max-height: 90%; border-radius: 10px; }
+    .result-item.selected { background: #cde8ff; border-color: #1976d2; }
+    .result-item input[type="checkbox"] { display: none; }
     @media (max-width: 480px) {
       .result-item { flex-direction: column; }
       .output { font-size: 1.1em; }
@@ -107,7 +109,14 @@
         checkbox.type = 'checkbox';
         checkbox.checked = false;
         checkbox.dataset.price = price;
-        checkbox.onchange = updateOfferCalc;
+
+        row.addEventListener('click', e => {
+          if (e.target.tagName !== 'IMG') {
+            checkbox.checked = !checkbox.checked;
+            row.classList.toggle('selected', checkbox.checked);
+            updateOfferCalc();
+          }
+        });
 
         const text = document.createElement('div');
         text.className = 'result-text';
@@ -119,14 +128,13 @@
         const img = document.createElement('img');
         const large = imgEl?.getAttribute('data-src') || imgEl?.src?.replace(/s-l\d+/, 's-l1000');
         img.src = large;
-        img.onclick = () => showLightbox(large);
 
         row.appendChild(checkbox);
         row.appendChild(img);
         row.appendChild(text);
         results.appendChild(row);
 
-        allPrices.push({ el: checkbox, price });
+        allPrices.push({ el: checkbox, price, row });
       });
 
       const sliderWrap = document.getElementById('sliderWrap');
@@ -147,6 +155,8 @@
       const prices = selected.map(p => p.price);
       const output = document.getElementById('offerOutput');
 
+      allPrices.forEach(p => p.row.classList.toggle('selected', p.el.checked));
+
       if (!prices.length) return output.textContent = 'Select comps to calculate average.';
       const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
       const offer = (avg * val / 100).toFixed(2);
@@ -159,7 +169,10 @@
     }
 
     function clearSelections() {
-      allPrices.forEach(p => p.el.checked = false);
+      allPrices.forEach(p => {
+        p.el.checked = false;
+        p.row.classList.remove('selected');
+      });
       updateOfferCalc();
     }
 
