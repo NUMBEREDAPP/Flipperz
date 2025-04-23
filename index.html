@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>#'d Comp Tool</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f9f9f9; color: #222; }
+    .container { max-width: 480px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    h1 { font-size: 1.5em; text-align: center; }
+    input[type=text] { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; }
+    button { background: #2196F3; color: white; padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; }
+    .results { margin-top: 20px; }
+    .slider-container { margin-top: 15px; }
+    .output { font-weight: bold; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>#'d COMP TOOL</h1>
+    <input id="itemInput" type="text" placeholder="Paste eBay link or item ID">
+    <button onclick="fetchPrice()">Check Price</button>
+    <div class="results" id="results" style="display:none;">
+      <p><strong>Original Ask:</strong> <span id="askPrice"></span></p>
+      <p><strong>Accepted Offer:</strong> <span id="offerPrice"></span></p>
+      <div class="slider-container">
+        <label for="slider">Your Offer %:</label><br>
+        <input type="range" id="slider" min="60" max="100" value="80" oninput="updateEstimate()">
+        <div class="output" id="estimate"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let acceptedPrice = 0;
+
+    function fetchPrice() {
+      const input = document.getElementById('itemInput').value.trim();
+      const itemIdMatch = input.match(/(\\d{12,})/);
+      if (!itemIdMatch) return alert("Please enter a valid eBay link or item ID.");
+      const itemId = itemIdMatch[1];
+      const url = `https://www.flippertools.com/tools/ebay-best-offer-actual-price.php?item=${itemId}`;
+
+      fetch(url)
+        .then(r => r.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const spans = doc.querySelectorAll('span');
+          const prices = [...spans].map(el => el.textContent.match(/\\$[\\d,.]+/g)).flat().filter(Boolean);
+          if (prices.length < 2) throw new Error('Could not find both prices');
+          document.getElementById('askPrice').textContent = prices[0];
+          document.getElementById('offerPrice').textContent = prices[1];
+          acceptedPrice = parseFloat(prices[1].replace(/[$,]/g, ''));
+          document.getElementById('results').style.display = 'block';
+          updateEstimate();
+        })
+        .catch(err => alert("Failed to fetch price. Make sure the item is real and has an accepted offer."));
+    }
+
+    function updateEstimate() {
+      const percent = document.getElementById('slider').value;
+      const est = (acceptedPrice * (percent / 100)).toFixed(2);
+      document.getElementById('estimate').textContent = `${percent}% Offer = $${est}`;
+    }
+  </script>
+</body>
+</html>
