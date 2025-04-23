@@ -199,20 +199,70 @@
     let fullItemList = [];
     let itemsShown = 0;
 
-    function showImagePopup(src) {
-      const popupContainer = document.getElementById('popupContainer');
-      popupContainer.innerHTML = `
-        <div class="overlay" onclick="closeImagePopup()"></div>
-        <div class="image-popup">
-          <button class="image-popup-close" onclick="closeImagePopup()">&times;</button>
-          <img src="${src}" alt="Expanded Image" />
-        </div>
-      `;
-      popupContainer.style.display = 'block';
+    function runSearch() {
+      const query = document.getElementById('searchInput').value.trim();
+      const results = document.getElementById('results');
+      const loadMore = document.getElementById('loadMore');
+      results.innerHTML = '';
+      fullItemList = [];
+      itemsShown = 0;
+      loadMore.style.display = 'none';
+
+      if (!query) {
+        results.innerHTML = '<p style="color:#888;">Please enter a search term.</p>';
+        return;
+      }
+
+      fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.ebay.com/sch/i.html?_nkw=' + query + '&_sop=13&LH_Complete=1&LH_Sold=1')}`)
+        .then(response => response.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          fullItemList = [...doc.querySelectorAll('.s-item')];
+
+          if (!fullItemList.length) {
+            results.innerHTML = '<p style="color:#888;">No sold results found.</p>';
+            return;
+          }
+
+          loadNextPage();
+          loadMore.style.display = 'block';
+        })
+        .catch(err => {
+          console.error(err);
+          results.innerHTML = '<p style="color:#f66;">Error fetching eBay results.</p>';
+        });
     }
 
-    function closeImagePopup() {
-      document.getElementById('popupContainer').style.display = 'none';
+    function loadNextPage() {
+      const results = document.getElementById('results');
+      const items = fullItemList.slice(itemsShown, itemsShown + 10);
+      let html = '';
+
+      items.forEach(item => {
+        const title = item.querySelector('.s-item__title')?.innerText || 'No title';
+        const img = item.querySelector('img.s-item__image-img')?.src || '';
+        const priceText = item.querySelector('.s-item__price')?.innerText || '';
+        const price = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
+        const date = item.querySelector('.s-item__title--tagblock')?.innerText.replace('Sold ', '') || '';
+
+        if (!price || !img || !title || !date) return;
+
+        html += `
+          <div class="result-item">
+            <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
+            <img src="${img}" alt="Card" onclick="showImagePopup('${img}')" />
+            <div class="result-text">
+              <strong>$${price.toFixed(2)}</strong><br />${title}<br />
+              <small>Sold: ${date}</small>
+            </div>
+          </div>
+        `;
+      });
+
+      results.insertAdjacentHTML('beforeend', html);
+      itemsShown += items.length;
+      updateOfferCalc();
     }
 
     function updateOfferCalc() {
@@ -252,70 +302,20 @@
       document.getElementById('loadMore').style.display = 'none';
     }
 
-    function runSearch() {
-      const query = document.getElementById('searchInput').value.trim();
-      const results = document.getElementById('results');
-      const loadMore = document.getElementById('loadMore');
-      results.innerHTML = '';
-      fullItemList = [];
-      itemsShown = 0;
-      loadMore.style.display = 'none';
-
-      if (!query) {
-        results.innerHTML = '<p style="color:#888;">Please enter a search term.</p>';
-        return;
-      }
-
-      fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.ebay.com/sch/i.html?_nkw=' + query + '&_sop=13&LH_Complete=1&LH_Sold=1')}`)
-        .then(res => res.text())
-        .then(text => {
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(text, 'text/html');
-          fullItemList = [...doc.querySelectorAll('.s-item')];
-
-          if (!fullItemList.length) {
-            results.innerHTML = '<p style="color:#888;">No sold results found.</p>';
-            return;
-          }
-
-          loadNextPage();
-          loadMore.style.display = 'block';
-        })
-        .catch(err => {
-          console.error(err);
-          results.innerHTML = '<p style="color:#f66;">Error fetching eBay results.</p>';
-        });
+    function showImagePopup(src) {
+      const popupContainer = document.getElementById('popupContainer');
+      popupContainer.innerHTML = `
+        <div class="overlay" onclick="closeImagePopup()"></div>
+        <div class="image-popup">
+          <button class="image-popup-close" onclick="closeImagePopup()">&times;</button>
+          <img src="${src}" alt="Expanded Image" />
+        </div>
+      `;
+      popupContainer.style.display = 'block';
     }
 
-    function loadNextPage() {
-      const results = document.getElementById('results');
-      const items = fullItemList.slice(itemsShown, itemsShown + 10);
-      let html = '';
-
-      items.forEach(item => {
-        const title = item.querySelector('.s-item__title')?.innerText || 'No title';
-        const img = item.querySelector('img.s-item__image-img')?.getAttribute('src') || '';
-        const priceText = item.querySelector('.s-item__price')?.innerText || '';
-        const price = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
-        const date = item.querySelector('.s-item__title--tagblock')?.innerText?.replace('Sold ', '') || '';
-
-        if (!price || !img || !title || !date) return;
-
-        html += `
-          <div class="result-item">
-            <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
-            <img src="${img}" alt="Card" onclick="showImagePopup('${img}')" />
-            <div class="result-text">
-              <strong>$${price.toFixed(2)}</strong><br />${title}<br />
-              <small>Sold: ${date}</small>
-            </div>
-          </div>
-        `;
-      });
-
-      results.insertAdjacentHTML('beforeend', html);
-      itemsShown += items.length;
-      updateOfferCalc();
+    function closeImagePopup() {
+      document.getElementById('popupContainer').style.display = 'none';
     }
   </script>
 </body>
