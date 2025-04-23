@@ -55,7 +55,7 @@
       z-index: 998;
     }
     .slider-container {
-      margin-top: 24px;
+      margin-top: 32px;
     }
     #slider {
       -webkit-appearance: none;
@@ -75,7 +75,7 @@
       background: #00cc6a;
       cursor: pointer;
       border: none;
-      margin-top: -11px;
+      transform: translateY(-11px);
     }
     #slider::-moz-range-thumb {
       width: 16px;
@@ -89,7 +89,7 @@
       position: relative;
       height: 10px;
       max-width: 300px;
-      margin: 4px auto 0;
+      margin: 8px auto 0;
     }
     .slider-ticks::before {
       content: "";
@@ -161,7 +161,7 @@
     <button onclick="runSearch()">Search eBay Sold Listings</button>
 
     <div class="slider-container" id="sliderWrap">
-      <label for="slider">Adjust Offer %: <span id="sliderDisplay">80%</span></label><br />
+      <div style="margin-bottom: 8px;">Adjust Offer %: <span id="sliderDisplay">80%</span></div>
       <input type="range" id="slider" min="60" max="100" step="5" value="80" oninput="updateOfferCalc()" />
       <div class="slider-ticks"></div>
       <div class="slider-labels">
