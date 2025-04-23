@@ -89,7 +89,7 @@
       position: relative;
       height: 10px;
       max-width: 300px;
-      margin: 8px auto 0;
+      margin: 12px auto 0;
     }
     .slider-ticks::before {
       content: "";
@@ -101,10 +101,10 @@
       background: repeating-linear-gradient(
         to right,
         transparent,
-        transparent 10%,
-        #00cc6a 10%,
-        #00cc6a 10.5%,
-        transparent 10.5%
+        transparent 5%,
+        #00cc6a 5%,
+        #00cc6a 5.2%,
+        transparent 5.2%
       );
     }
     .slider-labels {
@@ -113,7 +113,7 @@
       max-width: 300px;
       margin: 8px auto 12px;
       font-size: 0.85em;
-      color: #aaa;
+      color: #00cc6a;
     }
     .quick-buttons button {
       margin: 0 6px;
@@ -161,7 +161,7 @@
     <button onclick="runSearch()">Search eBay Sold Listings</button>
 
     <div class="slider-container" id="sliderWrap">
-      <div style="margin-bottom: 8px;">Adjust Offer %: <span id="sliderDisplay">80%</span></div>
+      <div style="margin-bottom: 16px;">Adjust Offer %: <span id="sliderDisplay">80%</span></div>
       <input type="range" id="slider" min="60" max="100" step="5" value="80" oninput="updateOfferCalc()" />
       <div class="slider-ticks"></div>
       <div class="slider-labels">
