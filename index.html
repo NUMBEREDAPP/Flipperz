@@ -19,16 +19,10 @@
       padding: 32px 0;
       text-align: center;
     }
-    h1 {
-      font-size: 2em;
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    .subtitle {
-      font-size: 1em;
-      font-weight: 400;
-      color: #888;
-      margin-bottom: 20px;
+    .header-logo {
+      width: 240px;
+      margin: 0 auto 12px auto;
+      display: block;
     }
     input[type="text"] {
       width: 100%;
@@ -134,9 +128,8 @@
 </head>
 <body>
   <div class="container">
-    <h1>Flipperz</h1>
-    <div class="subtitle">Brought to you by Numbered Tech</div>
-    <input id="searchInput" type="text" placeholder="Search any card, any set, or any product" />
+    <img src="slider-logo-placeholder.png" alt="Flipperz Logo" class="header-logo">
+    <input id="searchInput" type="text" placeholder="Search any card, set, or product" />
     <br />
     <button onclick="runSearch()">Search eBay Sold Listings</button>
 
@@ -186,6 +179,7 @@
         const priceEl = item.querySelector('.s-item__price');
         const titleEl = item.querySelector('.s-item__title');
         const imgEl = item.querySelector('img');
+        const dateEl = item.querySelector('.s-item__title--tagblock .POSITIVE');
         const priceMatch = priceEl?.textContent.match(/\$([\d,\.]+)/);
         const price = priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : null;
         if (!price || !titleEl || titleEl.textContent.includes('Shop on eBay')) return;
@@ -207,7 +201,8 @@
 
         const text = document.createElement('div');
         text.className = 'result-text';
-        text.innerHTML = `<strong>$${price.toFixed(2)}</strong><br>${titleEl.textContent}`;
+        const dateText = dateEl?.textContent ? `<small>${dateEl.textContent}</small>` : '';
+        text.innerHTML = `<strong>$${price.toFixed(2)}</strong><br>${titleEl.textContent}${dateText}`;
 
         const img = document.createElement('img');
         img.src = imgEl?.src?.replace(/s-l\d+/, 's-l1000') || imgEl?.src;
