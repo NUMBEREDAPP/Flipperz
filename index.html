@@ -10,17 +10,17 @@
     input[type=text] { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; }
     button { padding: 10px 20px; background: #1976d2; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 20px; }
     button:hover { background: #125aa3; }
-    .result-item { background: #f0f8ff; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 6px; display: flex; align-items: center; gap: 10px; }
-    .result-item img { height: 60px; border-radius: 4px; }
+    .result-item { background: #f0f8ff; border: 1px solid #ddd; padding: 15px; margin-bottom: 12px; border-radius: 6px; display: flex; align-items: center; gap: 15px; font-size: 1.05em; }
+    .result-item img { height: 75px; width: auto; border-radius: 4px; }
     .result-text { flex: 1; }
     .slider-container { margin-top: 20px; text-align: center; }
-    .output { font-weight: bold; font-size: 1.2em; margin-top: 10px; text-align: center; }
+    .output { font-weight: bold; font-size: 1.3em; margin-top: 12px; text-align: center; color: #2c3e50; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>#'d Comp Finder (eBay)</h1>
-    <input id="searchInput" type="text" placeholder="Type something like: Chandler Simpson /499 auto">
+    <h1>#'d COMP FINDER (eBay)</h1>
+    <input id="searchInput" type="text" placeholder="Try: Chandler Simpson /499 auto">
     <button onclick="runSearch()">Search eBay Sold Listings</button>
 
     <div id="results"></div>
@@ -51,7 +51,10 @@
           results.innerHTML = '';
           allPrices = [];
 
+          let count = 0;
           items.forEach(item => {
+            if (count >= 10) return; // limit to 10 most recent by default
+
             const priceEl = item.querySelector('.s-item__price');
             const titleEl = item.querySelector('.s-item__title');
             const imgEl = item.querySelector('img');
@@ -64,7 +67,7 @@
 
               const checkbox = document.createElement('input');
               checkbox.type = 'checkbox';
-              checkbox.checked = true;
+              checkbox.checked = false; // default unchecked now
               checkbox.onchange = updateOfferCalc;
               checkbox.dataset.price = price;
 
@@ -82,6 +85,7 @@
               results.appendChild(row);
 
               allPrices.push({ el: checkbox, price });
+              count++;
             }
           });
 
@@ -108,7 +112,7 @@
 
       const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
       const offer = (avg * sliderVal / 100).toFixed(2);
-      document.getElementById('offerOutput').textContent = `Avg: $${avg.toFixed(2)} | ${sliderVal}% Offer: $${offer}`;
+      document.getElementById('offerOutput').textContent = `Average of ${prices.length} comps: $${avg.toFixed(2)} → ${sliderVal}% Offer: $${offer}`;
     }
   </script>
 </body>
