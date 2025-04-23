@@ -122,17 +122,18 @@
         const priceEl = item.querySelector('.s-item__price');
         const titleEl = item.querySelector('.s-item__title');
         const imgEl = item.querySelector('img');
-        const dateEl = item.querySelector('.s-item__title--tagblock span');
+        const dateText = item.querySelector('.s-item__title--tagblock span')?.textContent;
         const priceMatch = priceEl?.textContent.match(/\$([\d,\.]+)/);
         const price = priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : null;
         if (!price || !titleEl || titleEl.textContent.includes('Shop on eBay')) return;
 
         let formattedDate = '';
         let monthKey = '';
-        if (dateEl?.textContent) {
-          const parsed = new Date(dateEl.textContent);
-          if (!isNaN(parsed)) {
-            formattedDate = parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        if (dateText) {
+          const match = dateText.match(/Sold\s*\w+\s+(\d{1,2}),\s+(\d{4})/);
+          if (match) {
+            const parsed = new Date(`${match[1]} ${match[2]}`);
+            formattedDate = parsed.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
             monthKey = parsed.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
           }
         }
@@ -154,18 +155,21 @@
         checkbox.dataset.price = price;
         checkbox.style.display = 'none';
 
-        row.addEventListener('click', () => {
-          checkbox.checked = !checkbox.checked;
-          row.classList.toggle('selected', checkbox.checked);
-          updateOfferCalc();
+        row.addEventListener('click', (e) => {
+          if (!e.target.classList.contains('expand-img')) {
+            checkbox.checked = !checkbox.checked;
+            row.classList.toggle('selected', checkbox.checked);
+            updateOfferCalc();
+          }
         });
 
         const text = document.createElement('div');
         text.className = 'result-text';
         text.innerHTML = `<strong>$${price.toFixed(2)}</strong><br>${titleEl.textContent}`;
-        if (formattedDate) text.innerHTML += `<br><small>Sold on: ${formattedDate}</small>`;
+        if (formattedDate) text.innerHTML += `<br><small>Sold: ${formattedDate}</small>`;
 
         const img = document.createElement('img');
+        img.className = 'expand-img';
         img.src = imgEl?.src?.replace(/s-l\d+/, 's-l1000') || imgEl?.src;
         img.onclick = (e) => {
           e.stopPropagation();
