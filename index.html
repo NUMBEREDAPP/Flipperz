@@ -85,11 +85,6 @@
       cursor: pointer;
       border: none;
     }
-    .slider-value {
-      margin-top: 8px;
-      font-size: 0.9em;
-      color: #aaa;
-    }
     .slider-ticks {
       position: relative;
       height: 10px;
@@ -106,17 +101,17 @@
       background: repeating-linear-gradient(
         to right,
         transparent,
-        transparent 4.5%,
-        #00cc6a 4.5%,
-        #00cc6a 5%,
-        transparent 5%
+        transparent 10%,
+        #00cc6a 10%,
+        #00cc6a 10.5%,
+        transparent 10.5%
       );
     }
     .slider-labels {
       display: flex;
       justify-content: space-between;
       max-width: 300px;
-      margin: 4px auto 12px;
+      margin: 8px auto 12px;
       font-size: 0.85em;
       color: #aaa;
     }
@@ -156,18 +151,6 @@
       cursor: pointer;
       margin-top: 8px;
     }
-    .result-item {
-      display: flex;
-      align-items: center;
-      background: #1a1a1a;
-      padding: 12px;
-      margin-top: 12px;
-      border-radius: 10px;
-      gap: 16px;
-    }
-    .result-text {
-      text-align: left;
-    }
   </style>
 </head>
 <body>
@@ -184,7 +167,6 @@
       <div class="slider-labels">
         <span>60%</span><span>70%</span><span>80%</span><span>90%</span><span>100%</span>
       </div>
-      <div class="slider-value" id="sliderValue">80%</div>
       <div class="quick-buttons">
         <button onclick="setSlider(80)">80%</button>
         <button onclick="setSlider(90)">90%</button>
@@ -218,7 +200,6 @@
     function updateOfferCalc() {
       const slider = document.getElementById('slider');
       const val = parseInt(slider.value);
-      document.getElementById('sliderValue').textContent = `${val}%`;
       document.getElementById('sliderDisplay').textContent = `${val}%`;
 
       const checkboxes = document.querySelectorAll('input[type="checkbox"][data-price]');
@@ -271,7 +252,7 @@
         html += `
           <div class="result-item">
             <input type="checkbox" data-price="${item.price}" onchange="updateOfferCalc()" />
-            <img src="${item.img}" alt="Card" class="expand-img" onclick="showImagePopup('${item.img}'); event.stopPropagation();" />
+            <img src="${item.img}" alt="Card" class="expand-img" onclick="showImagePopup('${item.img}')" />
             <div class="result-text">
               <strong>$${item.price.toFixed(2)}</strong><br />${item.title}<br />
               <small>Sold: ${item.date}</small>
