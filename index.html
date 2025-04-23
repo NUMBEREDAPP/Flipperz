@@ -156,6 +156,18 @@
       cursor: pointer;
       margin-top: 8px;
     }
+    .result-item {
+      display: flex;
+      align-items: center;
+      background: #1a1a1a;
+      padding: 12px;
+      margin-top: 12px;
+      border-radius: 10px;
+      gap: 16px;
+    }
+    .result-text {
+      text-align: left;
+    }
   </style>
 </head>
 <body>
@@ -227,8 +239,6 @@
       const average = total / count;
       const offer = (average * val / 100).toFixed(2);
       offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${val}% Offer: $${offer}`;
-    }%`;
-      document.getElementById('sliderDisplay').textContent = `${val}%`;
     }
 
     function setSlider(val) {
@@ -240,7 +250,8 @@
       const results = document.getElementById('results');
       results.innerHTML = '';
     }
-  function runSearch() {
+
+    function runSearch() {
       const query = document.getElementById('searchInput').value.trim();
       const results = document.getElementById('results');
 
@@ -260,7 +271,7 @@
         html += `
           <div class="result-item">
             <input type="checkbox" data-price="${item.price}" onchange="updateOfferCalc()" />
-            <img src="${item.img}" alt="Card" class="expand-img" onclick="showImagePopup('${item.img}')" />
+            <img src="${item.img}" alt="Card" class="expand-img" onclick="showImagePopup('${item.img}'); event.stopPropagation();" />
             <div class="result-text">
               <strong>$${item.price.toFixed(2)}</strong><br />${item.title}<br />
               <small>Sold: ${item.date}</small>
@@ -272,20 +283,6 @@
       results.innerHTML = html;
       updateOfferCalc();
     }
-
-      // Simulate search results
-      results.innerHTML = `
-        <div style="margin-top: 20px; background: #1a1a1a; padding: 12px; border-radius: 10px; text-align: left;">
-          <img src="https://via.placeholder.com/100" style="border-radius: 8px; cursor: pointer; float: left; margin-right: 12px;" onclick="showImagePopup('https://via.placeholder.com/600')" />
-          <div style="overflow: hidden;">
-            <strong>$150.00</strong> – Chandler Simpson 2022 Refractor Auto<br />
-            <span style="color: #999; font-size: 0.85em;">Sold: Apr 21, 2025</span>
-          </div>
-          <div style="clear: both;"></div>
-        </div>
-      `;
-    }
-
   </script>
 </body>
 </html>
