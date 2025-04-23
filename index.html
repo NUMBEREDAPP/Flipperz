@@ -10,10 +10,11 @@
     input[type=text] { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; }
     button { padding: 10px 20px; background: #1976d2; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 20px; }
     button:hover { background: #125aa3; }
-    .result-item { background: #f0f8ff; border: 1px solid #ddd; padding: 15px; margin-bottom: 12px; border-radius: 6px; display: flex; align-items: center; gap: 15px; font-size: 1.05em; }
+    .result-item { background: #eaf4ff; border: 1px solid #ddd; padding: 18px; margin-bottom: 12px; border-radius: 6px; display: flex; align-items: center; gap: 15px; font-size: 1.1em; }
     .result-item img { height: 75px; width: auto; border-radius: 4px; }
     .result-text { flex: 1; }
-    .slider-container { margin-top: 20px; text-align: center; }
+    .result-text small { color: #777; font-size: 0.9em; display: block; margin-top: 4px; }
+    .slider-container { margin-top: 20px; text-align: center; display: none; }
     .output { font-weight: bold; font-size: 1.3em; margin-top: 12px; text-align: center; color: #2c3e50; }
   </style>
 </head>
@@ -25,7 +26,7 @@
 
     <div id="results"></div>
 
-    <div class="slider-container" style="display:none" id="sliderWrap">
+    <div class="slider-container" id="sliderWrap">
       <label for="slider">Adjust Offer %:</label><br>
       <input type="range" id="slider" min="60" max="100" value="80" oninput="updateOfferCalc()">
       <div class="output" id="offerOutput"></div>
@@ -53,11 +54,12 @@
 
           let count = 0;
           items.forEach(item => {
-            if (count >= 10) return; // limit to 10 most recent by default
+            if (count >= 10) return;
 
             const priceEl = item.querySelector('.s-item__price');
             const titleEl = item.querySelector('.s-item__title');
             const imgEl = item.querySelector('img');
+            const dateEl = item.querySelector('.s-item__title--tagblock span');
             const priceMatch = priceEl?.textContent.match(/\$([\d,\.]+)/);
             const price = priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : null;
 
@@ -67,13 +69,17 @@
 
               const checkbox = document.createElement('input');
               checkbox.type = 'checkbox';
-              checkbox.checked = false; // default unchecked now
+              checkbox.checked = false;
               checkbox.onchange = updateOfferCalc;
               checkbox.dataset.price = price;
 
               const textDiv = document.createElement('div');
               textDiv.className = 'result-text';
               textDiv.innerHTML = `<strong>$${price.toFixed(2)}</strong><br>${titleEl.textContent}`;
+
+              if (dateEl) {
+                textDiv.innerHTML += `<small>${dateEl.textContent}</small>`;
+              }
 
               row.appendChild(checkbox);
               if (imgEl?.src) {
