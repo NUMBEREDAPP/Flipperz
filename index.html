@@ -11,7 +11,7 @@
     button { padding: 10px 16px; background: #1976d2; color: white; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 20px; font-size: 1em; }
     button:hover { background: #125aa3; }
     .result-item { background: #eaf4ff; border: 1px solid #ddd; padding: 12px; margin-bottom: 12px; border-radius: 6px; display: flex; align-items: flex-start; gap: 10px; font-size: 1em; flex-wrap: wrap; }
-    .result-item img { height: 100px; width: auto; border-radius: 4px; flex-shrink: 0; }
+    .result-item img { height: 100px; width: auto; border-radius: 4px; flex-shrink: 0; object-fit: contain; image-rendering: auto; }
     .result-text { flex: 1; min-width: 0; }
     .result-text small { color: #777; font-size: 0.85em; display: block; margin-top: 4px; }
     .slider-container { margin-top: 20px; margin-bottom: 20px; text-align: center; display: none; }
@@ -113,15 +113,10 @@
           if (dateEl) textDiv.innerHTML += `<small>${dateEl.textContent}</small>`;
 
           row.appendChild(checkbox);
-          if (imgEl?.getAttribute('data-src')) {
-            const img = document.createElement('img');
-            img.src = imgEl.getAttribute('data-src');
-            row.appendChild(img);
-          } else if (imgEl?.src) {
-            const img = document.createElement('img');
-            img.src = imgEl.src;
-            row.appendChild(img);
-          }
+          const img = document.createElement('img');
+          const largeImg = imgEl?.getAttribute('data-src') || imgEl?.src?.replace('s-l64', 's-l500');
+          if (largeImg) img.src = largeImg;
+          row.appendChild(img);
 
           row.appendChild(textDiv);
           results.appendChild(row);
