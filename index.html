@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>#'d eBay Comp Tool</title>
+  <title>FLIPPERz Comp Tool - By NUMBERED</title>
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f5f5f5; color: #222; }
     .container { max-width: 720px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -14,7 +14,7 @@
     .result-item img { height: 75px; width: auto; border-radius: 4px; }
     .result-text { flex: 1; }
     .result-text small { color: #777; font-size: 0.9em; display: block; margin-top: 4px; }
-    .slider-container { margin-top: 20px; text-align: center; display: none; }
+    .slider-container { margin-top: 20px; text-align: center; display: block; }
     .output { font-weight: bold; font-size: 1.3em; margin-top: 12px; text-align: center; color: #2c3e50; }
     #showMoreBtn { display: none; margin: 0 auto 20px; padding: 10px 15px; border: 1px solid #888; background: #f8f8f8; border-radius: 6px; cursor: pointer; text-align: center; }
     #showMoreBtn:hover { background: #e0e0e0; }
@@ -22,7 +22,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>Flipperz Comp Tool by NUMBERED (eBay)</h1>
+    <h1>FLIPPERz Comp Tool – By NUMBERED</h1>
     <input id="searchInput" type="text" placeholder="Try: Chandler Simpson /499 auto">
     <button onclick="runSearch()">Search eBay Sold Listings</button>
 
@@ -32,7 +32,7 @@
     <div class="slider-container" id="sliderWrap">
       <label for="slider">Adjust Offer %:</label><br>
       <input type="range" id="slider" min="60" max="100" value="80" oninput="updateOfferCalc()">
-      <div class="output" id="offerOutput"></div>
+      <div class="output" id="offerOutput">Select comps to calculate average.</div>
     </div>
   </div>
 
@@ -62,7 +62,6 @@
       results.innerHTML = '';
       allPrices = [];
 
-      let count = 0;
       allRawItems.forEach((item, idx) => {
         if (idx >= showCount) return;
 
@@ -98,7 +97,6 @@
           results.appendChild(row);
 
           allPrices.push({ el: checkbox, price });
-          count++;
         }
       });
 
@@ -123,14 +121,16 @@
       const selected = allPrices.filter(p => p.el.checked);
       const prices = selected.map(p => p.price);
 
+      const output = document.getElementById('offerOutput');
+
       if (prices.length === 0) {
-        document.getElementById('offerOutput').textContent = 'Select comps to calculate average.';
+        output.textContent = 'Select comps to calculate average.';
         return;
       }
 
       const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
       const offer = (avg * sliderVal / 100).toFixed(2);
-      document.getElementById('offerOutput').textContent = `Average of ${prices.length} comps: $${avg.toFixed(2)} → ${sliderVal}% Offer: $${offer}`;
+      output.textContent = `Average of ${prices.length} comps: $${avg.toFixed(2)} → ${sliderVal}% Offer: $${offer}`;
     }
   </script>
 </body>
