@@ -14,10 +14,18 @@
     .result-item img { height: 75px; width: auto; border-radius: 4px; }
     .result-text { flex: 1; }
     .result-text small { color: #777; font-size: 0.9em; display: block; margin-top: 4px; }
-    .slider-container { margin-top: 0; margin-bottom: 20px; text-align: center; display: none; }
+    .slider-container { margin-top: 20px; margin-bottom: 20px; text-align: center; display: none; }
     .output { font-weight: bold; font-size: 1.3em; margin-top: 12px; text-align: center; color: #2c3e50; }
     #showMoreBtn { display: none; margin: 0 auto 20px; padding: 10px 15px; border: 1px solid #888; background: #f8f8f8; border-radius: 6px; cursor: pointer; text-align: center; }
     #showMoreBtn:hover { background: #e0e0e0; }
+    .quick-buttons { margin-top: 8px; }
+    .quick-buttons button { background: #ddd; margin: 0 5px; color: #333; }
+    .quick-buttons button:hover { background: #ccc; }
+    .badge { font-size: 0.75em; color: white; background: #444; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
+    .badge.bin { background: #4caf50; }
+    .badge.auction { background: #f57c00; }
+    .clear-btn { background: #888; color: white; padding: 5px 10px; border: none; border-radius: 4px; margin-left: 8px; cursor: pointer; font-size: 0.9em; }
+    .clear-btn:hover { background: #555; }
   </style>
 </head>
 <body>
@@ -26,14 +34,18 @@
     <input id="searchInput" type="text" placeholder="Try: Chandler Simpson /499 auto">
     <button onclick="runSearch()">Search eBay Sold Listings</button>
 
-    <div id="results"></div>
-
     <div class="slider-container" id="sliderWrap">
       <label for="slider">Adjust Offer %:</label><br>
       <input type="range" id="slider" min="60" max="100" value="80" oninput="updateOfferCalc()">
+      <div class="quick-buttons">
+        <button onclick="setSlider(80)">80%</button>
+        <button onclick="setSlider(90)">90%</button>
+        <button class="clear-btn" onclick="clearSelections()">Clear Selections</button>
+      </div>
       <div class="output" id="offerOutput">Select comps to calculate average.</div>
     </div>
 
+    <div id="results"></div>
     <div id="showMoreBtn" onclick="showMoreResults()">Show More Results</div>
   </div>
 
@@ -72,6 +84,9 @@
         const dateEl = item.querySelector('.s-item__title--tagblock span');
         const priceMatch = priceEl?.textContent.match(/\$([\d,\.]+)/);
         const price = priceMatch ? parseFloat(priceMatch[1].replace(/,/g, '')) : null;
+        const subtitle = item.querySelector('.s-item__subtitle')?.textContent.toLowerCase();
+        const isBin = subtitle?.includes('buy it now');
+        const isAuction = subtitle?.includes('auction');
 
         if (price && titleEl && !titleEl.textContent.includes('Shop on eBay')) {
           const row = document.createElement('div');
@@ -85,7 +100,11 @@
 
           const textDiv = document.createElement('div');
           textDiv.className = 'result-text';
-          textDiv.innerHTML = `<strong>$${price.toFixed(2)}</strong><br>${titleEl.textContent}`;
+          let titleLine = `<strong>$${price.toFixed(2)}</strong><br>${titleEl.textContent}`;
+          if (isBin) titleLine += ' <span class="badge bin">BIN</span>';
+          if (isAuction) titleLine += ' <span class="badge auction">Auction</span>';
+
+          textDiv.innerHTML = titleLine;
           if (dateEl) textDiv.innerHTML += `<small>${dateEl.textContent}</small>`;
 
           row.appendChild(checkbox);
@@ -101,17 +120,15 @@
         }
       });
 
+      const sliderWrap = document.getElementById('sliderWrap');
       if (allPrices.length > 0) {
-        document.getElementById('sliderWrap').style.display = 'block';
+        sliderWrap.style.display = 'block';
         document.getElementById('showMoreBtn').style.display = (allRawItems.length > showCount) ? 'block' : 'none';
         updateOfferCalc();
-        // Move sliderWrap to just below the search bar
-        const container = document.querySelector('.container');
-        const input = document.getElementById('searchInput');
-        const sliderWrap = document.getElementById('sliderWrap');
-        container.insertBefore(sliderWrap, document.getElementById('results'));
+        const resultsContainer = document.getElementById('results');
+        resultsContainer.parentNode.insertBefore(sliderWrap, resultsContainer);
       } else {
-        document.getElementById('sliderWrap').style.display = 'none';
+        sliderWrap.style.display = 'none';
         document.getElementById('showMoreBtn').style.display = 'none';
         results.innerHTML = '<p>No results with valid prices found.</p>';
       }
@@ -137,6 +154,16 @@
       const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
       const offer = (avg * sliderVal / 100).toFixed(2);
       output.textContent = `Average of ${prices.length} comps: $${avg.toFixed(2)} → ${sliderVal}% Offer: $${offer}`;
+    }
+
+    function setSlider(val) {
+      document.getElementById('slider').value = val;
+      updateOfferCalc();
+    }
+
+    function clearSelections() {
+      allPrices.forEach(p => p.el.checked = false);
+      updateOfferCalc();
     }
   </script>
 </body>
