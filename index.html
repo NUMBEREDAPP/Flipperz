@@ -75,7 +75,7 @@
       background: #00cc6a;
       cursor: pointer;
       border: none;
-      transform: translateY(-11px);
+      transform: translateY(-12px);
     }
     #slider::-moz-range-thumb {
       width: 16px;
@@ -86,32 +86,22 @@
       border: none;
     }
     .slider-ticks {
-      position: relative;
-      height: 10px;
+      display: flex;
+      justify-content: space-between;
       max-width: 300px;
-      margin: 12px auto 0;
+      margin: 12px auto 4px;
     }
-    .slider-ticks::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
+    .slider-ticks span {
+      position: relative;
+      width: 1px;
       height: 10px;
-      background: repeating-linear-gradient(
-        to right,
-        transparent,
-        transparent 5%,
-        #00cc6a 5%,
-        #00cc6a 5.2%,
-        transparent 5.2%
-      );
+      background: #00cc6a;
     }
     .slider-labels {
       display: flex;
       justify-content: space-between;
       max-width: 300px;
-      margin: 8px auto 12px;
+      margin: 4px auto 12px;
       font-size: 0.85em;
       color: #00cc6a;
     }
@@ -161,9 +151,11 @@
     <button onclick="runSearch()">Search eBay Sold Listings</button>
 
     <div class="slider-container" id="sliderWrap">
-      <div style="margin-bottom: 16px;">Adjust Offer %: <span id="sliderDisplay">80%</span></div>
+      <div style="margin-bottom: 24px;">Adjust Offer %: <span id="sliderDisplay">80%</span></div>
       <input type="range" id="slider" min="60" max="100" step="5" value="80" oninput="updateOfferCalc()" />
-      <div class="slider-ticks"></div>
+      <div class="slider-ticks">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
       <div class="slider-labels">
         <span>60%</span><span>70%</span><span>80%</span><span>90%</span><span>100%</span>
       </div>
