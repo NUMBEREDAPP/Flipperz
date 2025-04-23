@@ -208,6 +208,27 @@
       const val = parseInt(slider.value);
       document.getElementById('sliderValue').textContent = `${val}%`;
       document.getElementById('sliderDisplay').textContent = `${val}%`;
+
+      const checkboxes = document.querySelectorAll('input[type="checkbox"][data-price]');
+      let total = 0, count = 0;
+      checkboxes.forEach(cb => {
+        if (cb.checked) {
+          total += parseFloat(cb.dataset.price);
+          count++;
+        }
+      });
+
+      const offerOutput = document.getElementById('offerOutput');
+      if (count === 0) {
+        offerOutput.textContent = 'Select comps to calculate average.';
+        return;
+      }
+
+      const average = total / count;
+      const offer = (average * val / 100).toFixed(2);
+      offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${val}% Offer: $${offer}`;
+    }%`;
+      document.getElementById('sliderDisplay').textContent = `${val}%`;
     }
 
     function setSlider(val) {
@@ -216,8 +237,55 @@
     }
 
     function clearSelections() {
-      // Placeholder for clearing selections
+      const results = document.getElementById('results');
+      results.innerHTML = '';
     }
+  function runSearch() {
+      const query = document.getElementById('searchInput').value.trim();
+      const results = document.getElementById('results');
+
+      if (!query) {
+        results.innerHTML = '<p style="color:#888;">Please enter a search term.</p>';
+        return;
+      }
+
+      const sampleData = [
+        { price: 143, title: 'Chandler Simpson /499 Auto', date: 'Apr 15, 2025', img: 'https://via.placeholder.com/100' },
+        { price: 160, title: 'Chandler Simpson Gold Refractor Auto /50', date: 'Apr 14, 2025', img: 'https://via.placeholder.com/100' },
+        { price: 135, title: 'Chandler Simpson Base Chrome Auto', date: 'Apr 13, 2025', img: 'https://via.placeholder.com/100' }
+      ];
+
+      let html = '';
+      sampleData.forEach(item => {
+        html += `
+          <div class="result-item">
+            <input type="checkbox" data-price="${item.price}" onchange="updateOfferCalc()" />
+            <img src="${item.img}" alt="Card" class="expand-img" onclick="showImagePopup('${item.img}')" />
+            <div class="result-text">
+              <strong>$${item.price.toFixed(2)}</strong><br />${item.title}<br />
+              <small>Sold: ${item.date}</small>
+            </div>
+          </div>
+        `;
+      });
+
+      results.innerHTML = html;
+      updateOfferCalc();
+    }
+
+      // Simulate search results
+      results.innerHTML = `
+        <div style="margin-top: 20px; background: #1a1a1a; padding: 12px; border-radius: 10px; text-align: left;">
+          <img src="https://via.placeholder.com/100" style="border-radius: 8px; cursor: pointer; float: left; margin-right: 12px;" onclick="showImagePopup('https://via.placeholder.com/600')" />
+          <div style="overflow: hidden;">
+            <strong>$150.00</strong> – Chandler Simpson 2022 Refractor Auto<br />
+            <span style="color: #999; font-size: 0.85em;">Sold: Apr 21, 2025</span>
+          </div>
+          <div style="clear: both;"></div>
+        </div>
+      `;
+    }
+
   </script>
 </body>
 </html>
