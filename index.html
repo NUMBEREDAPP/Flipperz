@@ -14,7 +14,7 @@
     .result-item img { height: 75px; width: auto; border-radius: 4px; }
     .result-text { flex: 1; }
     .result-text small { color: #777; font-size: 0.9em; display: block; margin-top: 4px; }
-    .slider-container { margin-bottom: 20px; text-align: center; display: block; }
+    .slider-container { margin-top: 0; margin-bottom: 20px; text-align: center; display: none; }
     .output { font-weight: bold; font-size: 1.3em; margin-top: 12px; text-align: center; color: #2c3e50; }
     #showMoreBtn { display: none; margin: 0 auto 20px; padding: 10px 15px; border: 1px solid #888; background: #f8f8f8; border-radius: 6px; cursor: pointer; text-align: center; }
     #showMoreBtn:hover { background: #e0e0e0; }
@@ -26,13 +26,14 @@
     <input id="searchInput" type="text" placeholder="Try: Chandler Simpson /499 auto">
     <button onclick="runSearch()">Search eBay Sold Listings</button>
 
+    <div id="results"></div>
+
     <div class="slider-container" id="sliderWrap">
       <label for="slider">Adjust Offer %:</label><br>
       <input type="range" id="slider" min="60" max="100" value="80" oninput="updateOfferCalc()">
       <div class="output" id="offerOutput">Select comps to calculate average.</div>
     </div>
 
-    <div id="results"></div>
     <div id="showMoreBtn" onclick="showMoreResults()">Show More Results</div>
   </div>
 
@@ -104,6 +105,11 @@
         document.getElementById('sliderWrap').style.display = 'block';
         document.getElementById('showMoreBtn').style.display = (allRawItems.length > showCount) ? 'block' : 'none';
         updateOfferCalc();
+        // Move sliderWrap to just below the search bar
+        const container = document.querySelector('.container');
+        const input = document.getElementById('searchInput');
+        const sliderWrap = document.getElementById('sliderWrap');
+        container.insertBefore(sliderWrap, document.getElementById('results'));
       } else {
         document.getElementById('sliderWrap').style.display = 'none';
         document.getElementById('showMoreBtn').style.display = 'none';
