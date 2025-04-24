@@ -216,9 +216,11 @@
       fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.ebay.com/sch/i.html?_nkw=' + query + '&_sop=13&LH_Complete=1&LH_Sold=1')}`)
         .then(response => response.text())
         .then(html => {
+          console.log('Raw HTML:', html); // Log raw response for debugging
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
           fullItemList = [...doc.querySelectorAll('.s-item')];
+          console.log('Parsed Items:', fullItemList); // Log parsed items
 
           if (!fullItemList.length) {
             results.innerHTML = '<p style="color:#888;">No sold results found.</p>';
@@ -248,21 +250,29 @@
 
         if (!price || !img || !title || !date) return;
 
+        // Sanitize title and date to prevent HTML injection
+        const safeTitle = title.replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+        const safeDate = date.replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
         html += `
           <div class="result-item">
             <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
-            <img src="${img}" alt="Card" onclick="showImagePopup('${img}')" />
+            <img src="${encodeURI(img)}" alt="Card" onclick="showImagePopup('${encodeURI(img)}')" />
             <div class="result-text">
-              <strong>$${price.toFixed(2)}</strong><br />${title}<br />
-              <small>Sold: ${date}</small>
+              <strong>$${price.toFixed(2)}</strong><br />${safeTitle}<br />
+              <small>Sold: ${safeDate}</small>
             </div>
           </div>
         `;
       });
 
+      console.log('Generated HTML:', html); // Log the HTML string for debugging
       results.insertAdjacentHTML('beforeend', html);
       itemsShown += items.length;
       updateOfferCalc();
+
+      // Hide load more button if no more items
+      document.getElementById('loadMore').style.display = itemsShown >= fullItemList.length ? 'none' : 'block';
     }
 
     function updateOfferCalc() {
@@ -307,7 +317,7 @@
       popupContainer.innerHTML = `
         <div class="overlay" onclick="closeImagePopup()"></div>
         <div class="image-popup">
-          <button class="image-popup-close" onclick="closeImagePopup()">&times;</button>
+          <button class="image-popup-close" onclick="closeImagePopup()">×</button>
           <img src="${src}" alt="Expanded Image" />
         </div>
       `;
