@@ -185,4 +185,44 @@
         <button onclick="setSlider(80)">80%</button>
         <button onclick="setSlider(90)">90%</button>
         <button onclick="clearSelections()">Clear</button>
-      </div
+      </div>
+      <div class="output" id="offerOutput">Select comps to calculate average.</div>
+    </div>
+
+    <div id="results"></div>
+    <button id="loadMore" onclick="loadNextPage()">Load More</button>
+  </div>
+
+  <div id="popupContainer" style="display:none;"></div>
+
+  <script>
+    let fullItemList = [];
+    let itemsShown = 0;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchButton = document.getElementById('searchButton');
+      const slider = document.getElementById('slider');
+      
+      if (searchButton) {
+        searchButton.addEventListener('click', runSearch);
+      } else {
+        console.error('Search button not found!');
+      }
+
+      if (slider) {
+        slider.addEventListener('input', updateOfferCalc);
+      } else {
+        console.error('Slider not found!');
+      }
+    });
+
+    function runSearch() {
+      const query = document.getElementById('searchInput').value.trim();
+      const results = document.getElementById('results');
+      const loadMore = document.getElementById('loadMore');
+      results.innerHTML = '';
+      fullItemList = [];
+      itemsShown = 0;
+      loadMore.style.display = 'none';
+
+      if (!
