@@ -222,7 +222,6 @@
           console.log('Raw HTML:', html.substring(0, 1000)); // Log first 1000 chars of raw response
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
-          // Try .s-item or fallback to other possible selectors
           fullItemList = [...doc.querySelectorAll('.s-item, .srp-results .s-item')];
           console.log('Parsed Items:', fullItemList); // Log parsed items
           console.log('Number of items found:', fullItemList.length);
@@ -247,19 +246,22 @@
       let itemsRendered = 0;
 
       items.forEach(item => {
-        // Updated selectors to be more resilient
         const title = item.querySelector('.s-item__title, [data-testid="ux-textual-display"]')?.innerText || 'No title';
         const img = item.querySelector('img.s-item__image-img, img')?.src || '';
         const priceText = item.querySelector('.s-item__price, [data-testid="ux-textual-display--price"]')?.innerText || '';
         const price = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
-        const date = item.querySelector('.s-item__title--tagblock, .s-item__ended-date')?.innerText.replace('Sold ', '') || '';
+        // Attempt to find the date with multiple selectors
+        const dateElement = item.querySelector('.s-item__title--tagblock, .s-item__ended-date, .s-item__caption');
+        const date = dateElement ? dateElement.innerText.replace('Sold ', '') : 'Unknown date';
 
-        if (!price || !img || !title || !date) {
+        // Log the entire item DOM to inspect its structure
+        console.log('Item DOM:', item.outerHTML);
+
+        if (!price || !img || !title) {
           console.log('Skipping item due to missing data:', { title, img, priceText, price, date });
           return;
         }
 
-        // Sanitize title and date to prevent HTML injection
         const safeTitle = title.replace(/[<>&"]/g, c => ({'<':'<','>':'>','&':'&','"':'"'}[c]));
         const safeDate = date.replace(/[<>&"]/g, c => ({'<':'<','>':'>','&':'&','"':'"'}[c]));
 
@@ -276,7 +278,7 @@
         itemsRendered++;
       });
 
-      console.log('Generated HTML:', html); // Log the HTML string
+      console.log('Generated HTML:', html);
       if (!html) {
         results.innerHTML = '<p style="color:#888;">No valid sold items found (missing required data). Try a different search term.</p>';
       } else {
@@ -285,7 +287,6 @@
       itemsShown += items.length;
       updateOfferCalc();
 
-      // Only show Load More if items were rendered and there are more to load
       document.getElementById('loadMore').style.display = (itemsRendered > 0 && itemsShown < fullItemList.length) ? 'block' : 'none';
     }
 
@@ -311,36 +312,4 @@
 
       const average = total / count;
       const offer = (average * val / 100).toFixed(2);
-      offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${val}% Offer: $${offer}`;
-    }
-
-    function setSlider(val) {
-      document.getElementById('slider').value = val;
-      updateOfferCalc();
-    }
-
-    function clearSelections() {
-      document.getElementById('results').innerHTML = '';
-      fullItemList = [];
-      itemsShown = 0;
-      document.getElementById('loadMore').style.display = 'none';
-    }
-
-    function showImagePopup(src) {
-      const popupContainer = document.getElementById('popupContainer');
-      popupContainer.innerHTML = `
-        <div class="overlay" onclick="closeImagePopup()"></div>
-        <div class="image-popup">
-          <button class="image-popup-close" onclick="closeImagePopup()">×</button>
-          <img src="${src}" alt="Expanded Image" />
-        </div>
-      `;
-      popupContainer.style.display = 'block';
-    }
-
-    function closeImagePopup() {
-      document.getElementById('popupContainer').style.display = 'none';
-    }
-  </script>
-</body>
-</html>
+      offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${
