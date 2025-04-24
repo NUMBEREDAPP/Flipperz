@@ -219,11 +219,11 @@
           return response.text();
         })
         .then(html => {
-          console.log('Raw HTML:', html.substring(0, 1000)); // Log first 1000 chars of raw response
+          console.log('Raw HTML:', html.substring(0, 1000));
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
           fullItemList = [...doc.querySelectorAll('.s-item, .srp-results .s-item')];
-          console.log('Parsed Items:', fullItemList); // Log parsed items
+          console.log('Parsed Items:', fullItemList);
           console.log('Number of items found:', fullItemList.length);
 
           if (!fullItemList.length) {
@@ -245,22 +245,31 @@
       let html = '';
       let itemsRendered = 0;
 
-      items.forEach(item => {
+      items.forEach((item, index) => {
+        // Log the DOM structure of the first few items for debugging
+        if (index < 3) {
+          console.group(`Item ${index + 1} DOM Structure`);
+          console.log(item.outerHTML);
+          console.groupEnd();
+        }
+
         const title = item.querySelector('.s-item__title, [data-testid="ux-textual-display"]')?.innerText || 'No title';
-        const img = item.querySelector('img.s-item__image-img, img')?.src || '';
+        // Updated image selector to handle lazy-loaded images and nested structures
+        const imgElement = item.querySelector('img.s-item__image-img, .s-item__image img, img');
+        const img = imgElement ? (imgElement.getAttribute('src') || imgElement.getAttribute('data-src') || '') : '';
         const priceText = item.querySelector('.s-item__price, [data-testid="ux-textual-display--price"]')?.innerText || '';
         const price = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
-        // Attempt to find the date with multiple selectors
-        const dateElement = item.querySelector('.s-item__title--tagblock, .s-item__ended-date, .s-item__caption');
-        const date = dateElement ? dateElement.innerText.replace('Sold ', '') : 'Unknown date';
+        // Updated date selector to try more possibilities
+        const dateElement = item.querySelector('.s-item__title--tagblock, .s-item__ended-date, .s-item__caption, .s-item__time, [class*="sold"], [class*="time"]');
+        const date = dateElement ? dateElement.innerText.replace('Sold ', '').trim() : 'Unknown date';
 
-        // Log the entire item DOM to inspect its structure
-        console.log('Item DOM:', item.outerHTML);
-
-        if (!price || !img || !title) {
+        if (!price || !title) {
           console.log('Skipping item due to missing data:', { title, img, priceText, price, date });
           return;
         }
+
+        // Fallback image if none found
+        const finalImg = img || 'https://via.placeholder.com/80?text=No+Image';
 
         const safeTitle = title.replace(/[<>&"]/g, c => ({'<':'<','>':'>','&':'&','"':'"'}[c]));
         const safeDate = date.replace(/[<>&"]/g, c => ({'<':'<','>':'>','&':'&','"':'"'}[c]));
@@ -268,7 +277,7 @@
         html += `
           <div class="result-item">
             <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
-            <img src="${encodeURI(img)}" alt="Card" onclick="showImagePopup('${encodeURI(img)}')" />
+            <img src="${encodeURI(finalImg)}" alt="Card" onclick="showImagePopup('${encodeURI(finalImg)}')" />
             <div class="result-text">
               <strong>$${price.toFixed(2)}</strong><br />${safeTitle}<br />
               <small>Sold: ${safeDate}</small>
@@ -312,4 +321,36 @@
 
       const average = total / count;
       const offer = (average * val / 100).toFixed(2);
-      offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${
+      offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${val}% Offer: $${offer}`;
+    }
+
+    function setSlider(val) {
+      document.getElementById('slider').value = val;
+      updateOfferCalc();
+    }
+
+    function clearSelections() {
+      document.getElementById('results').innerHTML = '';
+      fullItemList = [];
+      itemsShown = 0;
+      document.getElementById('loadMore').style.display = 'none';
+    }
+
+    function showImagePopup(src) {
+      const popupContainer = document.getElementById('popupContainer');
+      popupContainer.innerHTML = `
+        <div class="overlay" onclick="closeImagePopup()"></div>
+        <div class="image-popup">
+          <button class="image-popup-close" onclick="closeImagePopup()">×</button>
+          <img src="${src}" alt="Expanded Image" />
+        </div>
+      `;
+      popupContainer.style.display = 'block';
+    }
+
+    function closeImagePopup() {
+      document.getElementById('popupContainer').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
