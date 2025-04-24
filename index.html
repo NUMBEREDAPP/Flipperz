@@ -233,7 +233,6 @@
           }
 
           loadNextPage();
-          loadMore.style.display = 'block';
         })
         .catch(err => {
           console.error('Fetch Error:', err);
@@ -245,16 +244,18 @@
       const results = document.getElementById('results');
       const items = fullItemList.slice(itemsShown, itemsShown + 10);
       let html = '';
+      let itemsRendered = 0;
 
       items.forEach(item => {
-        const title = item.querySelector('.s-item__title')?.innerText || 'No title';
-        const img = item.querySelector('img.s-item__image-img')?.src || '';
-        const priceText = item.querySelector('.s-item__price')?.innerText || '';
+        // Updated selectors to be more resilient
+        const title = item.querySelector('.s-item__title, [data-testid="ux-textual-display"]')?.innerText || 'No title';
+        const img = item.querySelector('img.s-item__image-img, img')?.src || '';
+        const priceText = item.querySelector('.s-item__price, [data-testid="ux-textual-display--price"]')?.innerText || '';
         const price = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
-        const date = item.querySelector('.s-item__title--tagblock')?.innerText.replace('Sold ', '') || '';
+        const date = item.querySelector('.s-item__title--tagblock, .s-item__ended-date')?.innerText.replace('Sold ', '') || '';
 
         if (!price || !img || !title || !date) {
-          console.log('Skipping item due to missing data:', { title, img, price, date });
+          console.log('Skipping item due to missing data:', { title, img, priceText, price, date });
           return;
         }
 
@@ -272,15 +273,20 @@
             </div>
           </div>
         `;
+        itemsRendered++;
       });
 
       console.log('Generated HTML:', html); // Log the HTML string
-      results.insertAdjacentHTML('beforeend', html);
+      if (!html) {
+        results.innerHTML = '<p style="color:#888;">No valid sold items found (missing required data). Try a different search term.</p>';
+      } else {
+        results.insertAdjacentHTML('beforeend', html);
+      }
       itemsShown += items.length;
       updateOfferCalc();
 
-      // Hide load more button if no more items
-      document.getElementById('loadMore').style.display = itemsShown >= fullItemList.length ? 'none' : 'block';
+      // Only show Load More if items were rendered and there are more to load
+      document.getElementById('loadMore').style.display = (itemsRendered > 0 && itemsShown < fullItemList.length) ? 'block' : 'none';
     }
 
     function updateOfferCalc() {
