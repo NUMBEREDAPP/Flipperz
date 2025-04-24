@@ -199,7 +199,6 @@
     let fullItemList = [];
     let itemsShown = 0;
 
-    // Attach event listener to the search button
     document.addEventListener('DOMContentLoaded', () => {
       const searchButton = document.getElementById('searchButton');
       if (searchButton) {
@@ -270,6 +269,12 @@
         const dateElement = item.querySelector('.s-item__title--tagblock, .s-item__ended-date, .s-item__caption, .s-item__time, [class*="sold"], [class*="time"]');
         const date = dateElement ? dateElement.innerText.replace('Sold ', '').trim() : 'Unknown date';
 
+        // Skip items that aren't sold listings (no date or placeholder title)
+        if (date === 'Unknown date' || title.toLowerCase().includes('shop on ebay')) {
+          console.log('Skipping non-sold item:', { title, price, date });
+          return;
+        }
+
         if (!price || !title) {
           console.log('Skipping item due to missing data:', { title, img, priceText, price, date });
           return;
@@ -285,78 +290,4 @@
             <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
             <img src="${encodeURI(finalImg)}" alt="Card" onclick="showImagePopup('${encodeURI(finalImg)}')" />
             <div class="result-text">
-              <strong>$${price.toFixed(2)}</strong><br />${safeTitle}<br />
-              <small>Sold: ${safeDate}</small>
-            </div>
-          </div>
-        `;
-        itemsRendered++;
-      });
-
-      console.log('Generated HTML:', html);
-      if (!html) {
-        results.innerHTML = '<p style="color:#888;">No valid sold items found (missing required data). Try a different search term.</p>';
-      } else {
-        results.insertAdjacentHTML('beforeend', html);
-      }
-      itemsShown += items.length;
-      updateOfferCalc();
-
-      document.getElementById('loadMore').style.display = (itemsRendered > 0 && itemsShown < fullItemList.length) ? 'block' : 'none';
-    }
-
-    function updateOfferCalc() {
-      const slider = document.getElementById('slider');
-      const val = parseInt(slider.value);
-      document.getElementById('sliderDisplay').textContent = `${val}%`;
-
-      const checkboxes = document.querySelectorAll('input[type="checkbox"][data-price]');
-      let total = 0, count = 0;
-      checkboxes.forEach(cb => {
-        if (cb.checked) {
-          total += parseFloat(cb.dataset.price);
-          count++;
-        }
-      });
-
-      const offerOutput = document.getElementById('offerOutput');
-      if (count === 0) {
-        offerOutput.textContent = 'Select comps to calculate average.';
-        return;
-      }
-
-      const average = total / count;
-      const offer = (average * val / 100).toFixed(2);
-      offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${val}% Offer: $${offer}`;
-    }
-
-    function setSlider(val) {
-      document.getElementById('slider').value = val;
-      updateOfferCalc();
-    }
-
-    function clearSelections() {
-      document.getElementById('results').innerHTML = '';
-      fullItemList = [];
-      itemsShown = 0;
-      document.getElementById('loadMore').style.display = 'none';
-    }
-
-    function showImagePopup(src) {
-      const popupContainer = document.getElementById('popupContainer');
-      popupContainer.innerHTML = `
-        <div class="overlay" onclick="closeImagePopup()"></div>
-        <div class="image-popup">
-          <button class="image-popup-close" onclick="closeImagePopup()">×</button>
-          <img src="${src}" alt="Expanded Image" />
-        </div>
-      `;
-      popupContainer.style.display = 'block';
-    }
-
-    function closeImagePopup() {
-      document.getElementById('popupContainer').style.display = 'none';
-    }
-  </script>
-</body>
-</html>
+              <strong>$${price.toFixed(2)}</
