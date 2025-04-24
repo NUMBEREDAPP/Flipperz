@@ -282,11 +282,11 @@
         console.log(`Item ${index + 1} Details:`, { title, price, date, img: img || 'No image' });
         console.log(`Item ${index + 1} Date Element:`, dateElement ? dateElement.outerHTML : 'Not found');
 
-        // Temporarily remove the filter to debug rendering
-        // if (title.toLowerCase().includes('shop on ebay')) {
-        //   console.log('Skipping non-sold item (title filter):', { title, price, date });
-        //   return;
-        // }
+        // Filter out non-sold items
+        if (title.toLowerCase().includes('shop on ebay') || date === 'Unknown date') {
+          console.log('Skipping non-sold item:', { title, price, date });
+          return;
+        }
 
         if (!price || !title) {
           console.log('Skipping item due to missing data:', { title, img, priceText, price, date });
