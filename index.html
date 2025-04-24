@@ -170,7 +170,7 @@
     <img src="flipperz-logo.png" alt="Flipperz Logo" style="width: 240px; height: auto; margin-bottom: 16px;" />
     <input id="searchInput" type="text" placeholder="Search any card, set, or product" />
     <br />
-    <button onclick="runSearch()">Search eBay Sold Listings</button>
+    <button id="searchButton">Search eBay Sold Listings</button>
 
     <div class="slider-container" id="sliderWrap">
       <div style="margin-bottom: 36px; margin-top: 24px;">Adjust Offer %: <span id="sliderDisplay">80%</span></div>
@@ -198,6 +198,16 @@
   <script>
     let fullItemList = [];
     let itemsShown = 0;
+
+    // Attach event listener to the search button
+    document.addEventListener('DOMContentLoaded', () => {
+      const searchButton = document.getElementById('searchButton');
+      if (searchButton) {
+        searchButton.addEventListener('click', runSearch);
+      } else {
+        console.error('Search button not found!');
+      }
+    });
 
     function runSearch() {
       const query = document.getElementById('searchInput').value.trim();
@@ -246,7 +256,6 @@
       let itemsRendered = 0;
 
       items.forEach((item, index) => {
-        // Log the DOM structure of the first few items for debugging
         if (index < 3) {
           console.group(`Item ${index + 1} DOM Structure`);
           console.log(item.outerHTML);
@@ -254,12 +263,10 @@
         }
 
         const title = item.querySelector('.s-item__title, [data-testid="ux-textual-display"]')?.innerText || 'No title';
-        // Updated image selector to handle lazy-loaded images and nested structures
         const imgElement = item.querySelector('img.s-item__image-img, .s-item__image img, img');
         const img = imgElement ? (imgElement.getAttribute('src') || imgElement.getAttribute('data-src') || '') : '';
         const priceText = item.querySelector('.s-item__price, [data-testid="ux-textual-display--price"]')?.innerText || '';
         const price = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
-        // Updated date selector to try more possibilities
         const dateElement = item.querySelector('.s-item__title--tagblock, .s-item__ended-date, .s-item__caption, .s-item__time, [class*="sold"], [class*="time"]');
         const date = dateElement ? dateElement.innerText.replace('Sold ', '').trim() : 'Unknown date';
 
@@ -268,7 +275,6 @@
           return;
         }
 
-        // Fallback image if none found
         const finalImg = img || 'https://via.placeholder.com/80?text=No+Image';
 
         const safeTitle = title.replace(/[<>&"]/g, c => ({'<':'<','>':'>','&':'&','"':'"'}[c]));
