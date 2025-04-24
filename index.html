@@ -19,41 +19,6 @@
       padding: 32px 0;
       text-align: center;
     }
-    .image-popup {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 999;
-      background: #000;
-      padding: 8px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-    .image-popup img {
-      max-width: 90vw;
-      max-height: 80vh;
-      border-radius: 8px;
-    }
-    .image-popup-close {
-      position: absolute;
-      top: 5px;
-      right: 10px;
-      color: #fff;
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 998;
-    }
     .slider-container {
       margin-top: 32px;
     }
@@ -77,14 +42,6 @@
       border: none;
       transform: translateY(-12px);
     }
-    #slider::-moz-range-thumb {
-      width: 16px;
-      height: 30px;
-      border-radius: 4px;
-      background: #00cc6a;
-      cursor: pointer;
-      border: none;
-    }
     .slider-ticks {
       display: flex;
       justify-content: space-between;
@@ -92,7 +49,6 @@
       margin: 12px auto 4px;
     }
     .slider-ticks span {
-      position: relative;
       width: 1px;
       height: 10px;
       background: #00cc6a;
@@ -114,11 +70,6 @@
       padding: 8px 16px;
       border-radius: 20px;
       cursor: pointer;
-    }
-    .output {
-      margin-top: 10px;
-      font-size: 1em;
-      font-weight: 600;
     }
     #searchInput {
       width: 90%;
@@ -216,11 +167,9 @@
       fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.ebay.com/sch/i.html?_nkw=' + query + '&_sop=13&LH_Complete=1&LH_Sold=1')}`)
         .then(response => response.text())
         .then(html => {
-          console.log('Raw HTML:', html); // Log raw response for debugging
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
           fullItemList = [...doc.querySelectorAll('.s-item')];
-          console.log('Parsed Items:', fullItemList); // Log parsed items
 
           if (!fullItemList.length) {
             results.innerHTML = '<p style="color:#888;">No sold results found.</p>';
@@ -246,33 +195,25 @@
         const img = item.querySelector('img.s-item__image-img')?.src || '';
         const priceText = item.querySelector('.s-item__price')?.innerText || '';
         const price = parseFloat(priceText.replace(/[^\d.]/g, '')) || 0;
-        const date = item.querySelector('.s-item__title--tagblock')?.innerText.replace('Sold ', '') || '';
+        const date = item.querySelector('.s-item__title--tagblock')?.innerText?.replace('Sold ', '') || '';
 
-        if (!price || !img || !title || !date) return;
-
-        // Sanitize title and date to prevent HTML injection
-        const safeTitle = title.replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
-        const safeDate = date.replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+        console.log({ title, img, priceText, price, date });
 
         html += `
           <div class="result-item">
             <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
-            <img src="${encodeURI(img)}" alt="Card" onclick="showImagePopup('${encodeURI(img)}')" />
+            <img src="${img}" alt="Card" onclick="showImagePopup('${img}')" />
             <div class="result-text">
-              <strong>$${price.toFixed(2)}</strong><br />${safeTitle}<br />
-              <small>Sold: ${safeDate}</small>
+              <strong>$${price.toFixed(2)}</strong><br />${title}<br />
+              <small>Sold: ${date}</small>
             </div>
           </div>
         `;
       });
 
-      console.log('Generated HTML:', html); // Log the HTML string for debugging
       results.insertAdjacentHTML('beforeend', html);
       itemsShown += items.length;
       updateOfferCalc();
-
-      // Hide load more button if no more items
-      document.getElementById('loadMore').style.display = itemsShown >= fullItemList.length ? 'none' : 'block';
     }
 
     function updateOfferCalc() {
@@ -290,43 +231,3 @@
       });
 
       const offerOutput = document.getElementById('offerOutput');
-      if (count === 0) {
-        offerOutput.textContent = 'Select comps to calculate average.';
-        return;
-      }
-
-      const average = total / count;
-      const offer = (average * val / 100).toFixed(2);
-      offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${val}% Offer: $${offer}`;
-    }
-
-    function setSlider(val) {
-      document.getElementById('slider').value = val;
-      updateOfferCalc();
-    }
-
-    function clearSelections() {
-      document.getElementById('results').innerHTML = '';
-      fullItemList = [];
-      itemsShown = 0;
-      document.getElementById('loadMore').style.display = 'none';
-    }
-
-    function showImagePopup(src) {
-      const popupContainer = document.getElementById('popupContainer');
-      popupContainer.innerHTML = `
-        <div class="overlay" onclick="closeImagePopup()"></div>
-        <div class="image-popup">
-          <button class="image-popup-close" onclick="closeImagePopup()">×</button>
-          <img src="${src}" alt="Expanded Image" />
-        </div>
-      `;
-      popupContainer.style.display = 'block';
-    }
-
-    function closeImagePopup() {
-      document.getElementById('popupContainer').style.display = 'none';
-    }
-  </script>
-</body>
-</html>
