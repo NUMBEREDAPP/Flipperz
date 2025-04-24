@@ -163,12 +163,6 @@
       margin: 20px auto;
       display: none;
     }
-    #loading {
-      display: none;
-      color: #00cc6a;
-      font-size: 1em;
-      margin-top: 16px;
-    }
   </style>
 </head>
 <body>
@@ -195,7 +189,6 @@
       <div class="output" id="offerOutput">Select comps to calculate average.</div>
     </div>
 
-    <div id="loading">Loading results...</div>
     <div id="results"></div>
     <button id="loadMore" onclick="loadNextPage()">Load More</button>
   </div>
@@ -227,20 +220,17 @@
       const query = document.getElementById('searchInput').value.trim();
       const results = document.getElementById('results');
       const loadMore = document.getElementById('loadMore');
-      const loading = document.getElementById('loading');
       results.innerHTML = '';
       fullItemList = [];
       itemsShown = 0;
       loadMore.style.display = 'none';
-      loading.style.display = 'block';
 
       if (!query) {
         results.innerHTML = '<p style="color:#888;">Please enter a search term.</p>';
-        loading.style.display = 'none';
         return;
       }
 
-      fetch(`https://corsproxy.io/?${encodeURIComponent('https://www.ebay.com/sch/i.html?_nkw=' + query + '&_sop=13&LH_Complete=1&LH_Sold=1')}`)
+      fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.ebay.com/sch/i.html?_nkw=' + query + '&_sop=13&LH_Complete=1&LH_Sold=1')}`)
         .then(response => {
           console.log('Fetch Response Status:', response.status);
           console.log('Fetch Response Headers:', response.headers);
@@ -251,13 +241,12 @@
           console.log('Raw HTML:', html.substring(0, 1000));
           const parser = new DOMParser();
           const doc = parser.parseFromString(html, 'text/html');
-          fullItemList = [...doc.querySelectorAll('.s-item, .srp-results .s-item')].slice(0, 20); // Limit to 20 items to reduce parsing time
+          fullItemList = [...doc.querySelectorAll('.s-item, .srp-results .s-item')];
           console.log('Parsed Items:', fullItemList);
           console.log('Number of items found:', fullItemList.length);
 
           if (!fullItemList.length) {
             results.innerHTML = '<p style="color:#888;">No sold results found. Try a different search term or check eBay directly.</p>';
-            loading.style.display = 'none';
             return;
           }
 
@@ -266,16 +255,14 @@
         .catch(err => {
           console.error('Fetch Error:', err);
           results.innerHTML = '<p style="color:#f66;">Error fetching eBay results: ' + err.message + '. Please try again later.</p>';
-          loading.style.display = 'none';
         });
     }
 
     function loadNextPage() {
       const results = document.getElementById('results');
-      const loading = document.getElementById('loading');
       const items = fullItemList.slice(itemsShown, itemsShown + 10);
       let html = '';
-      let items Plantation = 0;
+      let itemsRendered = 0;
 
       items.forEach((item, index) => {
         if (index < 3) {
@@ -314,7 +301,7 @@
         html += `
           <div class="result-item">
             <input type="checkbox" class="price-checkbox" data-price="${price}" />
-            <img src="${encodeURI(finalImg)}" alt="Card" loading="lazy" onclick="showImagePopup('${encodeURI(finalImg)}')" />
+            <img src="${encodeURI(finalImg)}" alt="Card" onclick="showImagePopup('${encodeURI(finalImg)}')" />
             <div class="result-text">
               <strong>$${price.toFixed(2)}</strong><br />${safeTitle}<br />
               <small>Sold: ${safeDate}</small>
@@ -344,7 +331,6 @@
         }
       }
       itemsShown += items.length;
-      loading.style.display = 'none';
 
       document.getElementById('loadMore').style.display = (itemsRendered > 0 && itemsShown < fullItemList.length) ? 'block' : 'none';
     }
