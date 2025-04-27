@@ -108,13 +108,27 @@ async function runSearch() {
   }
 
   try {
-    const ebayApiUrl = `https://api.ebay.com/buy/browse/v1/item_summary/search?q=${encodeURIComponent(query)}&filter=soldDate:[2023-01-01..2025-12-31]&limit=20`;
-    const proxyUrl = `https://flipperz-pied.vercel.app/api/proxy?url=${encodeURIComponent(ebayApiUrl)}`;
+    const payload = {
+      keywords: query,
+      itemFilter: [
+        { name: "SoldItemsOnly", value: true }
+      ],
+      paginationInput: {
+        entriesPerPage: 10
+      }
+    };
 
-    const response = await fetch(proxyUrl);
+    const response = await fetch('https://flipperz-pied.vercel.app/api/proxy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
     const data = await response.json();
 
-    const items = data.itemSummaries || [];
+    const items = data.findCompletedItemsResponse?.[0]?.searchResult?.[0]?.item || [];
 
     if (!items.length) {
       results.innerHTML = '<p style="color:#888;">No sold listings found. Try a different search.</p>';
@@ -128,6 +142,7 @@ async function runSearch() {
     results.innerHTML = '<p style="color:#f66;">Error fetching results. Try again later.</p>';
   }
 }
+
 
 function loadNextPage() {
   const results = document.getElementById('results');
