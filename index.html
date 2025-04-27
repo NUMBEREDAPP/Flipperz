@@ -19,24 +19,6 @@
       padding: 32px 0;
       text-align: center;
     }
-    .result-item {
-      display: flex;
-      align-items: center;
-      background: #111;
-      padding: 12px;
-      border-radius: 12px;
-      margin: 12px 0;
-      gap: 16px;
-    }
-    .result-item img {
-      width: 80px;
-      height: auto;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .result-text {
-      text-align: left;
-    }
     #searchInput {
       width: 90%;
       max-width: 480px;
@@ -58,9 +40,31 @@
       cursor: pointer;
       margin-top: 8px;
     }
+    .result-item {
+      display: flex;
+      align-items: center;
+      background: #111;
+      padding: 12px;
+      border-radius: 12px;
+      margin: 12px 0;
+      gap: 16px;
+    }
+    .result-item img {
+      width: 80px;
+      height: auto;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .result-text {
+      text-align: left;
+    }
     #slider {
       width: 300px;
+      margin-top: 20px;
+    }
+    #loadMore {
       margin: 20px auto;
+      display: none;
     }
     .output {
       margin-top: 10px;
@@ -70,27 +74,25 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <img src="flipperz-logo.png" alt="Flipperz Logo" style="width: 240px; height: auto; margin-bottom: 16px;" />
-    <input id="searchInput" type="text" placeholder="Search any card, set, or product" />
-    <br />
-    <button onclick="runSearch()">Search eBay Sold Listings</button>
+<div class="container">
+  <img src="flipperz-logo.png" alt="Flipperz Logo" style="width: 240px; height: auto; margin-bottom: 16px;" />
+  <input id="searchInput" type="text" placeholder="Search any card, set, or product" />
+  <br />
+  <button onclick="runSearch()">Search eBay Sold Listings</button>
 
-    <div>
-      <div style="margin-top: 24px;">Adjust Offer %: <span id="sliderDisplay">85%</span></div>
-      <input type="range" id="slider" min="60" max="100" step="5" value="85" oninput="updateOfferCalc()">
-      <div class="output" id="offerOutput">Select comps to calculate average.</div>
-    </div>
+  <div style="margin-top:24px;">Adjust Offer %: <span id="sliderDisplay">80%</span></div>
+  <input type="range" id="slider" min="60" max="100" step="5" value="80" oninput="updateOfferCalc()">
 
-    <div id="results"></div>
-    <button id="loadMore" style="display:none;" onclick="loadNextPage()">Load More</button>
-  </div>
+  <div class="output" id="offerOutput">Select comps to calculate average.</div>
+
+  <div id="results"></div>
+  <button id="loadMore" onclick="loadNextPage()">Load More</button>
+</div>
 
 <script>
+const PRODUCTION_OAUTH_TOKEN = 'v^1.1#i^1#I^3#f^0#r^0#p^3#t^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';
 let fullItemList = [];
 let itemsShown = 0;
-
-const EBAY_APP_ID = "Numbered-Flipperz-PRD-b0e716b3d-f74e52e3"; // Production AppID
 
 async function runSearch() {
   const query = document.getElementById('searchInput').value.trim();
@@ -106,20 +108,26 @@ async function runSearch() {
     return;
   }
 
-  const findingUrl = `https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=${EBAY_APP_ID}&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=${encodeURIComponent(query)}&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true&sortOrder=EndTimeNewest&paginationInput.entriesPerPage=50`;
-
   try {
-    const response = await fetch(findingUrl);
+    const response = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?q=${encodeURIComponent(query)}&filter=buyingOptions:{FIXED_PRICE}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${PRODUCTION_OAUTH_TOKEN}`,
+        'Content-Type': 'application/json',
+        'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
+      }
+    });
+
+    if (!response.ok) throw new Error('Fetch error: ' + response.status);
     const data = await response.json();
 
-    const items = data.findCompletedItemsResponse?.[0]?.searchResult?.[0]?.item || [];
+    fullItemList = data.itemSummaries || [];
 
-    if (!items.length) {
+    if (!fullItemList.length) {
       results.innerHTML = '<p style="color:#888;">No sold listings found. Try a different search.</p>';
       return;
     }
 
-    fullItemList = items;
     loadNextPage();
   } catch (err) {
     console.error(err);
@@ -130,30 +138,35 @@ async function runSearch() {
 function loadNextPage() {
   const results = document.getElementById('results');
   const loadMore = document.getElementById('loadMore');
-
+  let html = '';
   const items = fullItemList.slice(itemsShown, itemsShown + 10);
+
   items.forEach(item => {
-    const title = item.title?.[0] || 'No title';
-    const img = item.galleryURL?.[0] || 'https://via.placeholder.com/80';
-    const price = parseFloat(item.sellingStatus?.[0]?.currentPrice?.[0]?.__value__) || 0;
-    const soldDate = new Date(item.listingInfo?.[0]?.endTime?.[0]).toLocaleDateString();
+    const title = item.title || 'No title';
+    const img = item.image?.imageUrl || 'https://via.placeholder.com/80';
+    const price = item.price?.value ? parseFloat(item.price.value) : 0;
 
     if (!price) return;
 
-    results.innerHTML += `
+    html += `
       <div class="result-item">
         <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
         <img src="${img}" alt="Card" />
         <div class="result-text">
-          <strong>$${price.toFixed(2)}</strong><br />${title}<br />
-          <small>Sold: ${soldDate}</small>
+          <strong>$${price.toFixed(2)}</strong><br />${title}
         </div>
       </div>
     `;
   });
 
+  results.insertAdjacentHTML('beforeend', html);
+
   itemsShown += items.length;
-  loadMore.style.display = (itemsShown < fullItemList.length) ? 'block' : 'none';
+  if (itemsShown < fullItemList.length) {
+    loadMore.style.display = 'block';
+  } else {
+    loadMore.style.display = 'none';
+  }
 }
 
 function updateOfferCalc() {
@@ -163,6 +176,7 @@ function updateOfferCalc() {
 
   const checkboxes = document.querySelectorAll('input[type="checkbox"][data-price]');
   let total = 0, count = 0;
+
   checkboxes.forEach(cb => {
     if (cb.checked) {
       total += parseFloat(cb.dataset.price);
