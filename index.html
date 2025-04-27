@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flipperz – Brought to you by NUMBERED</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
@@ -19,107 +19,23 @@
       padding: 32px 0;
       text-align: center;
     }
-    .image-popup {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 999;
-      background: #000;
-      padding: 8px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    .result-item {
+      display: flex;
+      align-items: center;
+      background: #111;
+      padding: 12px;
+      border-radius: 12px;
+      margin: 12px 0;
+      gap: 16px;
     }
-    .image-popup img {
-      max-width: 90vw;
-      max-height: 80vh;
-      border-radius: 8px;
-    }
-    .image-popup-close {
-      position: absolute;
-      top: 5px;
-      right: 10px;
-      color: #fff;
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-    }
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
-      z-index: 998;
-    }
-    .slider-container {
-      margin-top: 32px;
-      display: block;
-    }
-    #slider {
-      -webkit-appearance: none;
-      width: 100%;
-      max-width: 300px;
-      height: 8px;
-      background: #333;
+    .result-item img {
+      width: 80px;
+      height: auto;
       border-radius: 6px;
-      outline: none;
-    }
-    #slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 30px;
-      border-radius: 4px;
-      background: #00cc6a;
-      cursor: pointer;
-      border: none;
-      transform: translateY(-12px);
-    }
-    #slider::-moz-range-thumb {
-      width: 16px;
-      height: 30px;
-      border-radius: 4px;
-      background: #00cc6a;
-      cursor: pointer;
-      border: none;
-    }
-    .slider-ticks {
-      display: flex;
-      justify-content: space-between;
-      max-width: 300px;
-      margin: 12px auto 4px;
-    }
-    .slider-ticks span {
-      position: relative;
-      width: 1px;
-      height: 10px;
-      background: #00cc6a;
-    }
-    .slider-labels {
-      display: flex;
-      justify-content: space-between;
-      max-width: 300px;
-      margin: 4px auto 12px;
-      font-size: 0.85em;
-      color: #00cc6a;
-    }
-    .quick-buttons button {
-      margin: 0 6px;
-      background: #00cc6a;
-      color: black;
-      font-weight: bold;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
       cursor: pointer;
     }
-    .output {
-      margin-top: 10px;
-      font-size: 1em;
-      font-weight: 600;
+    .result-text {
+      text-align: left;
     }
     #searchInput {
       width: 90%;
@@ -142,468 +58,85 @@
       cursor: pointer;
       margin-top: 8px;
     }
-    .result-item {
-      display: flex;
-      align-items: center;
-      background: #111;
-      padding: 12px;
-      border-radius: 12px;
-      margin: 12px 0;
-      gap: 16px;
-    }
-    .result-item img {
-      width: 80px;
-      height: auto;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .result-text {
-      text-align: left;
-    }
-    .feedback-green {
-      color: #00cc6a;
-    }
-    .feedback-yellow {
-      color: #ffcc00;
-    }
-    .feedback-red {
-      color: #f66;
-    }
-    .feedback-tooltip {
-      position: relative;
-      cursor: pointer;
-    }
-    .feedback-tooltip:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      background: #333;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.8em;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      z-index: 10;
-    }
-    #loadMore {
-      margin: 20px auto;
-      display: none;
-    }
-    #loading {
-      display: none;
-      color: #00cc6a;
-      font-size: 1em;
-      margin-top: 16px;
-    }
-    .env-toggle {
-      margin: 10px 0;
-      font-size: 0.9em;
-    }
-    .env-toggle label {
-      margin-right: 10px;
-    }
   </style>
 </head>
 <body>
   <div class="container">
     <img src="flipperz-logo.png" alt="Flipperz Logo" style="width: 240px; height: auto; margin-bottom: 16px;" />
-    <div class="env-toggle">
-      <label><input type="radio" name="env" value="sandbox" checked> Sandbox (Active Listings)</label>
-      <label><input type="radio" name="env" value="production"> Production (Sold Listings)</label>
-    </div>
     <input id="searchInput" type="text" placeholder="Search any card, set, or product" />
     <br />
-    <button id="searchButton">Search eBay Listings</button>
-
-    <div class="slider-container" id="sliderWrap">
-      <div style="margin-bottom: 36px; margin-top: 24px;">Adjust Offer %: <span id="sliderDisplay">80%</span></div>
-      <input type="range" id="slider" min="60" max="100" step="5" value="80" />
-      <div class="slider-ticks">
-        <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <div class="slider-labels">
-        <span>60%</span><span>70%</span><span>80%</span><span>90%</span><span>100%</span>
-      </div>
-      <div class="quick-buttons">
-        <button onclick="setSlider(80)">80%</button>
-        <button onclick="setSlider(90)">90%</button>
-        <button onclick="clearSelections()">Clear</button>
-      </div>
-      <div class="output" id="offerOutput">Select comps to calculate average.</div>
-    </div>
-
-    <div id="loading">Loading results...</div>
+    <button onclick="runSearch()">Search eBay Sold Listings</button>
     <div id="results"></div>
-    <button id="loadMore" onclick="loadNextPage()">Load More</button>
   </div>
 
-  <div id="popupContainer" style="display:none;"></div>
+<script>
+async function runSearch() {
+  const query = document.getElementById('searchInput').value.trim();
+  const results = document.getElementById('results');
+  results.innerHTML = '';
 
-  <script>
-    let fullItemList = [];
-    let itemsShown = 0;
-    const SANDBOX_ACCESS_TOKEN = "v^1.1#i^1#f^0#p^3#r^0#I^3#t^H4sIAAAAAAAA/+VZf2wbVx2P86MslHaq+DWVInnXTROpzn5nn8/2UbtyY6d1kyap7aZpaGW9e/fOueZ8d7l7l8RREWlAk4ZATFvZ/hgbEUIbTKJoiK7rBJs6oUIjQakErdC0CUbpJgqd1AkQEhK8sxPXzlgb25Nqwf1zunffX5/vr/cLLGzo7Xt478P/2OT5SOfSAljo9Hi4jaB3Q8+OzV2dW3s6QA2BZ2nhgYXuxa53dtqwqJliBtumodvYO1fUdFssD8YYx9JFA9qqLeqwiG2RIDGb2D8kBnxANC2DGMjQGG86GWMiAEQDwTBCUR7xmEN0VF+VmTNiDIwAXhEwDIeDCgcj9LdtOzit2wTqJMYEQCDEAp4NhHOAEwOcyId8VNwE4x3Dlq0aOiXxASZetlYs81o1pt7eUmjb2CJUCBNPJwayI4l0MjWc2+mvkRVfcUOWQOLY9V/9hoy9Y1Bz8O3V2GVqMesghG2b8ccrGuqFiolVY5owv+xpAYWRhDhJkPgwF41EPxRXDhhWEZLb2+GOqDKrlElFrBOVlO7kUeoN6RhGZOVrmIpIJ73u64ADNVVRsRVjUrsThw9mUxnGmx0dtYwZVcayi5QL8jzNKiAwcYJt6kJs5XWnKGELyyu6KgJXPL1GWb+hy6rrN9s7bJDdmBqO17qHq3EPJRrRR6yEQlyjaumCVTeCCTeulUA6ZFJ3Q4uL1Bfe8uedg7CaFbfy4MPKiwiWEeKlSESSgSQHhDV54dZ6U7kRd8OTGB31u7ZgCZbYIrSmMDE1iDCLqHudIrZUWQyGlEAwomBWFqIKy0cVhZVCssByCsYAY0lC0cj/WYoQYqmSQ3A1Tdb+KOOMMVlkmHjU0FRUYtaSlDvPSlLM2TFmkhBT9PtnZ2d9s0GfYRX8AQA4//j+oSyaxEXIVGnVOxOzajk9EKZctiqSkkmtmaPZR5XrBSYetORRaJHSbqdEv7NY0+hrNYPrLIyvHf0AqP2aSv2Qo4raC+lewybVnGkOmoxnVITzqny3kbm1Xo+O5VpCphkFVd+PyaRx17HV43J7QjrZEjbaQiFpL1TVxiLkuMhKA+IiPAvCIgAtgU2YZrpYdAiUNJxus1jy9BFay1PTce5+9dWjcjRgAGkaE4RbgubOvKIKFZEYU1i/1T/dWm8XrJnUQCaV3ZvPjQymhltCm8GKhe3JnIu13fI0cSAxkKDP/n3CRGGM55LGGDq0D5MD0/3B5BDK7FFTAWV+6FjaKEQnBAcc2jt8MDgRyvQnM1N7pm3nsKVwsyl/winEYi05KYuRhdusdQkThj3r1/jIFBnSpg8J/szAdHGKjI9bllIsoJmxYzi1Jzs3djAaaQ18rr4M2gW/VUncfLlK8/SrJZCpQl0/c2u9HUCGeTkUDSHARQUABSgHooIEZUVQ3EcKtD5FtVnFD6/sKNgBTTVNbM2z2d3jrBDgcQSEsMCGuYAcBhG+xbnrf3Xqst3dTXtBc/ltKgCaqs+dWX3IKPoNSPfw7lC+bLF3PUR+ySlR/TK2fBaGsqFrpfXzFRy6Z61wv4/JrfX/ymjTTZivsgWnUBrUWs/cAI+qz9Btm2GVmlFYZW6AByJkODppRt0KawMciqMpqqa5O/RmFNawN2KmDrUSUZHdfAzLZzDUvbZamCSNyqFjRWxRfgQJpDu8JhLYnjRM081CBK11Qi/Xi6LQeoEOKp93NWasKldOHpsFW+WnXULVWpZiTho6blVKudahLNOVQ9NBrFrkHhS2LKRylt1ULai623ftBlhMWCpXnqzapjtrNNBYCC76ZAsqjdSdy9QAuYWpUXD9mbqGqdlQ6AZRFRVVZNiOZCNLNZuolw+U00xwbdrEGwpthaGqqrWDGiyrFkYk71hqe60mVteH+RxGk/k8u2a9yM7LaAauoKS13tMcfte/7XgGN5rIZg+NZFo7hUvimXZb9XNhwHN0kc+CAAQsL4V4NgIRZLHChcKRaDgkodZ2d2137siF+VCYE6IguF5cawZq7jned8vlr79ojneUH27RswwWPec7PR6QBCy3A3xuQ9fB7q6PMTbt0z4b6rJkzPlUqPjoIkens5KFfVO4ZELV6vx4x2/+/Gj28KXBl554ZX76hG/X+Y7emvvupaPgvuqNd28Xt7Hm+htsu/Wnh7v305sCIcAHwoALcHxoAmy/9beb+1T3J372i2u//n2nnMv89fu/27zs23b6poeATVUij6eno3vR06Hf/9hbrxae6x0YBb+97y/JR799nDl38V9XY+rpB16+eeKfg1/c/nz8Ef6bO6KPDH1l+aEbz7x2v/DU1b4Lbz/5hytvfu+Xhy/9fXvs4pLSf3nbj59NDL9x8si/7+nr2zXyxru7zm760WeOosGbwufTG4rh44Y289GJG5e7XmHee/6rsVOlS1/744VXH4/6v7TtG+e/9diVM1s+uVk/e2NjPLszcvHUUeX6cxc7n7r6dN9PT76wfNZ4+/Ubl7XPvrD85viV4zNbQ8lF5cqFv53+wTtDXz7l3XriJyd/tTS48fVz/mf/tOu9h7yvfeH4D9/d8vMHE2f8L15PmNcuXDtz/eV9R05sObdUvCnl73niu1+/zrJL35k58uR851uVmP4HBsRDTokgAAA=";
-    const PRODUCTION_ACCESS_TOKEN = "YOUR_PRODUCTION_ACCESS_TOKEN"; // Replace with your Production access token
-    const EBAY_APP_ID = "YOUR_PRODUCTION_APP_ID"; // Replace with your Production AppID
-    const SANDBOX_APP_ID = "YOUR_SANDBOX_APP_ID"; // Replace with your Sandbox AppID
+  if (!query) {
+    results.innerHTML = '<p style="color:#888;">Please enter a search term.</p>';
+    return;
+  }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      try {
-        const searchButton = document.getElementById('searchButton');
-        const slider = document.getElementById('slider');
-        const sliderWrap = document.getElementById('sliderWrap');
-        const envRadios = document.querySelectorAll('input[name="env"]');
+  const findingUrl = `https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=YOUR_PRODUCTION_APP_ID&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=${encodeURIComponent(query)}&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true&sortOrder=EndTimeNewest&paginationInput.entriesPerPage=10`;
 
-        console.log('Slider Wrap Element:', sliderWrap);
+  try {
+    const response = await fetch(findingUrl);
+    const data = await response.json();
 
-        if (searchButton) {
-          searchButton.addEventListener('click', runSearch);
-        } else {
-          console.error('Search button not found!');
-        }
+    const items = data.findCompletedItemsResponse?.[0]?.searchResult?.[0]?.item || [];
 
-        if (slider) {
-          slider.addEventListener('input', updateOfferCalc);
-        } else {
-          console.error('Slider not found!');
-        }
-
-        envRadios.forEach(radio => {
-          radio.addEventListener('change', () => {
-            searchButton.textContent = radio.value === 'sandbox' ? 'Search eBay Listings' : 'Search eBay Sold Listings';
-          });
-        });
-      } catch (err) {
-        console.error('Error in DOMContentLoaded:', err);
-      }
-    });
-
-    async function runSearch() {
-      const query = document.getElementById('searchInput').value.trim();
-      const results = document.getElementById('results');
-      const loadMore = document.getElementById('loadMore');
-      const loading = document.getElementById('loading');
-      const env = document.querySelector('input[name="env"]:checked').value;
-      results.innerHTML = '';
-      fullItemList = [];
-      itemsShown = 0;
-      loadMore.style.display = 'none';
-      loading.style.display = 'block';
-
-      if (!query) {
-        results.innerHTML = '<p style="color:#888;">Please enter a search term.</p>';
-        loading.style.display = 'none';
-        return;
-      }
-
-      try {
-        if (env === 'sandbox') {
-          // Sandbox: Use Buy API to fetch active listings
-          const response = await fetch(`https://api.sandbox.ebay.com/buy/browse/v1/item_summary/search?q=${encodeURIComponent(query)}&limit=10`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${SANDBOX_ACCESS_TOKEN}`,
-              'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US',
-              'Content-Type': 'application/json',
-            },
-          });
-
-          console.log('Sandbox API Response Status:', response.status);
-          console.log('Sandbox API Response Headers:', response.headers);
-
-          if (!response.ok) {
-            if (response.status === 401) {
-              results.innerHTML = '<p style="color:#f66;">Sandbox OAuth token expired or invalid. Please generate a new user token.</p>';
-              loading.style.display = 'none';
-              return;
-            }
-            throw new Error(`Sandbox HTTP error! Status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          console.log('Sandbox API Response:', data);
-
-          if (!data.itemSummaries || data.itemSummaries.length === 0) {
-            results.innerHTML = '<p style="color:#888;">No results found in Sandbox. Try a different search term or add test listings.</p>';
-            loading.style.display = 'none';
-            return;
-          }
-
-          fullItemList = await Promise.all(data.itemSummaries.map(async (item) => {
-            try {
-              const userProfile = await fetchSellerFeedback(item.seller.username, env);
-              return { ...item, feedbackDetails: userProfile };
-            } catch (err) {
-              console.error(`Error fetching feedback for seller ${item.seller.username}:`, err);
-              return { ...item, feedbackDetails: null };
-            }
-          }));
-
-          console.log('Number of items found (Sandbox):', fullItemList.length);
-          loadNextPage();
-        } else {
-          // Production: Use Finding API to fetch sold listings
-          const findingUrl = `https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=${EBAY_APP_ID}&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=${encodeURIComponent(query)}&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true&sortOrder=EndTimeNewest&paginationInput.entriesPerPage=10`;
-          
-          const findingResponse = await fetch(findingUrl, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-
-          console.log('Finding API Response Status:', findingResponse.status);
-          console.log('Finding API Response Headers:', findingResponse.headers);
-
-          if (!findingResponse.ok) {
-            throw new Error(`Finding API HTTP error! Status: ${findingResponse.status}`);
-          }
-
-          const findingData = await findingResponse.json();
-          console.log('Finding API Response:', findingData);
-
-          if (!findingData.findCompletedItemsResponse || !findingData.findCompletedItemsResponse[0].searchResult || findingData.findCompletedItemsResponse[0].searchResult[0].item.length === 0) {
-            results.innerHTML = '<p style="color:#888;">No sold listings found. Try a different search term.</p>';
-            loading.style.display = 'none';
-            return;
-          }
-
-          const items = findingData.findCompletedItemsResponse[0].searchResult[0].item;
-
-          fullItemList = await Promise.all(items.map(async (item) => {
-            try {
-              const tradingUrl = `https://open.api.ebay.com/shopping?callname=GetSingleItem&responseencoding=JSON&appid=${EBAY_APP_ID}&version=967&ItemID=${item.itemId}&IncludeSelector=Details`;
-              
-              const tradingResponse = await fetch(tradingUrl, {
-                method: 'GET',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-              });
-
-              if (!tradingResponse.ok) {
-                console.warn(`Failed to fetch Trading API details for item ${item.itemId}: Status ${tradingResponse.status}`);
-                return {
-                  ...item,
-                  acceptedOfferPrice: null,
-                  soldDate: item.endTime,
-                };
-              }
-
-              const tradingData = await tradingResponse.json();
-              console.log(`Trading API Details for ${item.itemId}:`, tradingData);
-
-              const acceptedOfferPrice = tradingData.Item.BestOfferSale && tradingData.Item.ConvertedCurrentPrice
-                ? parseFloat(tradingData.Item.ConvertedCurrentPrice.value)
-                : null;
-
-              const userProfile = await fetchSellerFeedback(tradingData.Item.Seller.UserID, env);
-
-              return {
-                ...item,
-                acceptedOfferPrice,
-                soldDate: item.endTime,
-                seller: tradingData.Item.Seller,
-                feedbackDetails: userProfile,
-              };
-            } catch (err) {
-              console.error(`Error fetching Trading API details for item ${item.itemId}:`, err);
-              return {
-                ...item,
-                acceptedOfferPrice: null,
-                soldDate: item.endTime,
-              };
-            }
-          }));
-
-          console.log('Number of items found (Production):', fullItemList.length);
-          loadNextPage();
-        }
-      } catch (err) {
-        console.error('Fetch Error:', err);
-        results.innerHTML = '<p style="color:#f66;">Error fetching eBay results: ' + err.message + '. Please try again later.</p>';
-        loading.style.display = 'none';
-      }
+    if (!items.length) {
+      results.innerHTML = '<p style="color:#888;">No sold listings found. Try a different search.</p>';
+      return;
     }
 
-    async function fetchSellerFeedback(username, env) {
-      try {
-        const url = env === 'sandbox'
-          ? `https://open.api.sandbox.ebay.com/shopping?callname=GetUserProfile&responseencoding=JSON&appid=${SANDBOX_APP_ID}&version=967&UserID=${username}`
-          : `https://open.api.ebay.com/shopping?callname=GetUserProfile&responseencoding=JSON&appid=${EBAY_APP_ID}&version=967&UserID=${username}`;
-        
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+    items.forEach(item => {
+      const title = item.title?.[0] || 'No title';
+      const img = item.galleryURL?.[0] || 'https://via.placeholder.com/80';
+      const price = parseFloat(item.sellingStatus?.[0]?.currentPrice?.[0]?.__value__) || 0;
+      const soldDate = new Date(item.listingInfo?.[0]?.endTime?.[0]).toLocaleDateString();
 
-        if (!response.ok) {
-          console.warn(`Failed to fetch seller feedback for ${username}: Status ${response.status}`);
-          return null;
-        }
+      if (!price) return;
 
-        const data = await response.json();
-        return data.User;
-      } catch (err) {
-        console.error(`Error fetching seller feedback for ${username}:`, err);
-        return null;
-      }
-    }
-
-    function loadNextPage() {
-      const results = document.getElementById('results');
-      const loading = document.getElementById('loading');
-      const env = document.querySelector('input[name="env"]:checked').value;
-      const items = fullItemList.slice(itemsShown, itemsShown + 10);
-      let html = '';
-      let itemsRendered = 0;
-
-      items.forEach((item, index) => {
-        if (index < 3) {
-          console.group(`Item ${index + 1} Details`);
-          console.log('Item Data:', item);
-          console.groupEnd();
-        }
-
-        const title = item.title || 'No title';
-        const img = env === 'sandbox' ? (item.image ? item.image.imageUrl : '') : (item.galleryURL || '');
-        const listedPrice = env === 'sandbox' 
-          ? (parseFloat(item.price.value) || 0)
-          : (parseFloat(item.sellingStatus[0].convertedCurrentPrice[0].value) || 0);
-        const acceptedOfferPrice = env === 'production' ? (item.acceptedOfferPrice || null) : null;
-        const date = env === 'sandbox' 
-          ? 'Unknown date' 
-          : (item.soldDate ? new Date(item.soldDate).toLocaleDateString() : 'Unknown date');
-
-        const sellerFeedback = item.seller 
-          ? `${item.seller.feedbackScore || 'N/A'} (${item.seller.feedbackPercentage || item.seller.feedbackPercentPositive || 'N/A'}%)`
-          : 'N/A';
-        const feedbackClass = determineFeedbackClass(item.seller);
-        const detailedFeedback = item.seller && item.seller.feedbackRatingStar 
-          ? `Rating: ${item.seller.feedbackRatingStar}`
-          : 'No rating available';
-        const feedbackTooltip = item.feedbackDetails && item.feedbackDetails.FeedbackSummary
-          ? `Feedback: ${item.feedbackDetails.FeedbackSummary.PositiveFeedbackPercent}% positive (${item.feedbackDetails.FeedbackSummary.TotalFeedbackCount} reviews)`
-          : 'No feedback history available';
-
-        if (!listedPrice || !title) {
-          console.log('Skipping item due to missing data:', { title, img, listedPrice, date });
-          return;
-        }
-
-        const finalImg = img || 'https://via.placeholder.com/80?text=No+Image';
-
-        const safeTitle = title.replace(/[<>&"]/g, c => ({'<':'<','>':'>','&':'&','"':'"'}[c]));
-        const safeDate = date.replace(/[<>&"]/g, c => ({'<':'<','>':'>','&':'&','"':'"'}[c]));
-
-        html += `
-          <div class="result-item">
-            <input type="checkbox" class="price-checkbox" data-price="${acceptedOfferPrice || listedPrice}" />
-            <img src="${encodeURI(finalImg)}" alt="Card" loading="lazy" onclick="showImagePopup('${encodeURI(finalImg)}')" />
-            <div class="result-text">
-              <strong>$${listedPrice.toFixed(2)}</strong>
-              ${acceptedOfferPrice ? `<br /><small>Accepted Offer: $${acceptedOfferPrice.toFixed(2)}</small>` : ''}
-              <br />${safeTitle}<br />
-              <small>${env === 'production' ? 'Sold' : 'Listed'}: ${safeDate}</small><br />
-              <small class="feedback-tooltip ${feedbackClass}" data-tooltip="${feedbackTooltip}">Seller Feedback: ${sellerFeedback}</small><br />
-              <small class="${feedbackClass}">${detailedFeedback}</small>
-            </div>
+      results.innerHTML += `
+        <div class="result-item">
+          <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
+          <img src="${img}" alt="Card" />
+          <div class="result-text">
+            <strong>$${price.toFixed(2)}</strong><br />${title}<br />
+            <small>Sold: ${soldDate}</small>
           </div>
-        `;
-        itemsRendered++;
-      });
-
-      console.log('Generated HTML:', html);
-      if (!html) {
-        results.innerHTML = `<p style="color:#888;">No valid items found. ${env === 'sandbox' ? 'Try a different search term or add test listings in Sandbox.' : 'Try a different search term in Production.'}</p>`;
-      } else {
-        results.insertAdjacentHTML('beforeend', html);
-        
-        const checkboxes = document.querySelectorAll('.price-checkbox');
-        checkboxes.forEach(checkbox => {
-          checkbox.addEventListener('change', updateOfferCalc);
-        });
-
-        try {
-          updateOfferCalc();
-        } catch (e) {
-          console.error('Error calling updateOfferCalc in loadNextPage:', e);
-        }
-      }
-      itemsShown += items.length;
-      loading.style.display = 'none';
-
-      document.getElementById('loadMore').style.display = (itemsRendered > 0 && itemsShown < fullItemList.length) ? 'block' : 'none';
-    }
-
-    function determineFeedbackClass(seller) {
-      if (!seller || !seller.feedbackScore) return 'feedback-yellow';
-      const score = parseInt(seller.feedbackScore);
-      const ratingStar = seller.feedbackRatingStar || '';
-      if (score > 1000 || ratingStar.includes('Purple') || ratingStar.includes('Turquoise')) {
-        return 'feedback-green';
-      } else if (score < 50 || ratingStar.includes('Yellow')) {
-        return 'feedback-red';
-      }
-      return 'feedback-yellow';
-    }
-
-    function updateOfferCalc() {
-      const slider = document.getElementById('slider');
-      const val = parseInt(slider.value);
-      document.getElementById('sliderDisplay').textContent = `${val}%`;
-
-      const checkboxes = document.querySelectorAll('.price-checkbox');
-      let total = 0, count = 0;
-      checkboxes.forEach(cb => {
-        if (cb.checked) {
-          total += parseFloat(cb.dataset.price);
-          count++;
-        }
-      });
-
-      const offerOutput = document.getElementById('offerOutput');
-      if (count === 0) {
-        offerOutput.textContent = 'Select comps to calculate average.';
-        return;
-      }
-
-      const average = total / count;
-      const offer = (average * val / 100).toFixed(2);
-      offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${val}% Offer: $${offer}`;
-    }
-
-    function setSlider(val) {
-      document.getElementById('slider').value = val;
-      updateOfferCalc();
-    }
-
-    function clearSelections() {
-      document.getElementById('results').innerHTML = '';
-      fullItemList = [];
-      itemsShown = 0;
-      document.getElementById('loadMore').style.display = 'none';
-    }
-
-    function showImagePopup(src) {
-      const popupContainer = document.getElementById('popupContainer');
-      popupContainer.innerHTML = `
-        <div class="overlay" onclick="closeImagePopup()"></div>
-        <div class="image-popup">
-          <button class="image-popup-close" onclick="closeImagePopup()">×</button>
-          <img src="${src}" alt="Expanded Image" />
         </div>
       `;
-      popupContainer.style.display = 'block';
-    }
+    });
 
-    function closeImagePopup() {
-      document.getElementById('popupContainer').style.display = 'none';
+    updateOfferCalc();
+  } catch (err) {
+    console.error(err);
+    results.innerHTML = '<p style="color:#f66;">Error fetching results. Try again later.</p>';
+  }
+}
+
+function updateOfferCalc() {
+  const checkboxes = document.querySelectorAll('input[type="checkbox"][data-price]');
+  let total = 0, count = 0;
+
+  checkboxes.forEach(cb => {
+    if (cb.checked) {
+      total += parseFloat(cb.dataset.price);
+      count++;
     }
-  </script>
+  });
+
+  if (count > 0) {
+    const average = total / count;
+    console.log(`Average of ${count} comps: $${average.toFixed(2)}`);
+  }
+}
+</script>
+
 </body>
 </html>
