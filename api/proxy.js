@@ -8,7 +8,8 @@ export default async function handler(req, res) {
   try {
     const ebayRes = await fetch(url, {
       headers: {
-        "X-EBAY-SOA-SECURITY-APPNAME": "Numbered-Flipperz-PRD-b0e716b3d-f74e52e3"
+        "X-EBAY-SOA-SECURITY-APPNAME": "Numbered-Flipperz-PRD-b0e716b3d-f74e52e3",
+        "Accept": "application/json" // <-- IMPORTANT
       }
     });
 
