@@ -93,6 +93,7 @@
 let fullItemList = [];
 let itemsShown = 0;
 
+<script>
 async function runSearch() {
   const query = document.getElementById('searchInput').value.trim();
   const results = document.getElementById('results');
@@ -108,24 +109,11 @@ async function runSearch() {
   }
 
   try {
-    const payload = {
-      keywords: query,
-      itemFilter: [
-        { name: "SoldItemsOnly", value: true }
-      ],
-      paginationInput: {
-        entriesPerPage: 10
-      }
-    };
+    const ebayApiUrl = `https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=Numbered-Flipperz-PRD-b0e716b3d-f74e52e3&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=${encodeURIComponent(query)}&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true&sortOrder=EndTimeNewest&paginationInput.entriesPerPage=20`;
 
-    const response = await fetch('https://flipperz-pied.vercel.app/api/proxy', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    });
+    const proxyUrl = `https://flipperz-pied.vercel.app/api/proxy?url=${encodeURIComponent(ebayApiUrl)}`;
 
+    const response = await fetch(proxyUrl);
     const data = await response.json();
 
     const items = data.findCompletedItemsResponse?.[0]?.searchResult?.[0]?.item || [];
@@ -142,7 +130,7 @@ async function runSearch() {
     results.innerHTML = '<p style="color:#f66;">Error fetching results. Try again later.</p>';
   }
 }
-
+</script>
 
 function loadNextPage() {
   const results = document.getElementById('results');
