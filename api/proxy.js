@@ -1,43 +1,25 @@
-// New FIXED proxy.js for eBay Finding API POST
-
 export default async function handler(req, res) {
-  const { url, query } = req.query;
-
-  if (!url || !query) {
-    return res.status(400).json({ error: "Missing URL or query." });
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: "Method not allowed. Use POST." });
   }
 
   try {
-    const ebayRes = await fetch(url, {
+    const response = await fetch('https://svcs.ebay.com/services/search/FindingService/v1', {
       method: 'POST',
       headers: {
-        "X-EBAY-SOA-SECURITY-APPNAME": "Numbered-Flipperz-PRD-b0e716b3d-f74e52e3",
-        "Content-Type": "application/json",
+        'X-EBAY-SOA-SECURITY-APPNAME': 'Numbered-Flipperz-PRD-b0e716b3d-f74e52e3',
+        'X-EBAY-SOA-OPERATION-NAME': 'findCompletedItems',
+        'X-EBAY-SOA-SERVICE-VERSION': '1.0.0',
+        'X-EBAY-SOA-REQUEST-DATA-FORMAT': 'JSON',
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        keywords: query,
-        itemFilter: [
-          {
-            name: "SoldItemsOnly",
-            value: true
-          }
-        ],
-        sortOrder: "EndTimeNewest",
-        paginationInput: {
-          entriesPerPage: 10
-        }
-      })
+      body: JSON.stringify(req.body)
     });
 
-    if (!ebayRes.ok) {
-      throw new Error(`eBay API request failed: ${ebayRes.status}`);
-    }
-
-    const data = await ebayRes.json();
+    const data = await response.json();
     res.status(200).json(data);
-
   } catch (error) {
-    console.error("Proxy error:", error);
-    res.status(500).json({ error: "Proxy request failed." });
+    console.error('Proxy error:', error);
+    res.status(500).json({ error: 'Proxy request failed.' });
   }
 }
