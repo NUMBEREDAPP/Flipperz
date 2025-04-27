@@ -74,6 +74,7 @@
   </style>
 </head>
 <body>
+
 <div class="container">
   <img src="flipperz-logo.png" alt="Flipperz Logo" style="width: 240px; height: auto; margin-bottom: 16px;" />
   <input id="searchInput" type="text" placeholder="Search any card, set, or product" />
@@ -90,7 +91,11 @@
 </div>
 
 <script>
-const EBAY_APP_ID = 'Numbered-Flipperz-PRD-b0e716b3d-f74e52e3'; // Replace with your App ID
+const EBAY_APP_ID = 'Numbered-Flipperz-PRD-b0e716b3d-f74e52e3'; // <-- your real APP ID
+const PROXY_URL = 'https://flipperz-pied.vercel.app/'; // <-- your real proxy URL
+
+let fullItemList = [];
+let itemsShown = 0;
 
 async function runSearch() {
   const query = document.getElementById('searchInput').value.trim();
@@ -107,28 +112,92 @@ async function runSearch() {
   }
 
   try {
-    const proxyUrl = 'https://thingproxy.freeboard.io/fetch/';
-    const ebayUrl = `https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=${EBAY_APP_ID}&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=${encodeURIComponent(query)}&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true&sortOrder=EndTimeNewest&paginationInput.entriesPerPage=20`;
+    const ebayApiUrl = `https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=${EBAY_APP_ID}&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=${encodeURIComponent(query)}&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true`;
 
-    const response = await fetch(proxyUrl + encodeURIComponent(ebayUrl));
-    if (!response.ok) throw new Error('Proxy or eBay fetch error: ' + response.status);
+    const proxyEncodedUrl = encodeURIComponent(ebayApiUrl);
+    const proxyFetchUrl = `${PROXY_URL}${proxyEncodedUrl}`;
 
-    const findingData = await response.json();
+    const response = await fetch(proxyFetchUrl);
 
-    const items = findingData.findCompletedItemsResponse?.[0]?.searchResult?.[0]?.item;
+    if (!response.ok) throw new Error('Fetch error: ' + response.status);
 
-    if (!items || items.length === 0) {
-      results.innerHTML = '<p style="color:#888;">No sold listings found. Try another search.</p>';
+    const data = await response.json();
+
+    const items = data.findCompletedItemsResponse?.[0]?.searchResult?.[0]?.item || [];
+
+    if (!items.length) {
+      results.innerHTML = '<p style="color:#888;">No sold listings found. Try a different search.</p>';
       return;
     }
 
     fullItemList = items;
     loadNextPage();
   } catch (err) {
-    console.error('Fetch error:', err);
-    results.innerHTML = '<p style="color:#f66;">Error fetching eBay results: ' + err.message + '. Try again later.</p>';
+    console.error(err);
+    results.innerHTML = '<p style="color:#f66;">Error fetching results. Try again later.</p>';
   }
 }
+
+function loadNextPage() {
+  const results = document.getElementById('results');
+  const loadMore = document.getElementById('loadMore');
+  let html = '';
+  const items = fullItemList.slice(itemsShown, itemsShown + 10);
+
+  items.forEach(item => {
+    const title = item.title?.[0] || 'No title';
+    const img = item.galleryURL?.[0] || 'https://via.placeholder.com/80';
+    const price = parseFloat(item.sellingStatus?.[0]?.currentPrice?.[0]?.__value__) || 0;
+
+    if (!price) return;
+
+    html += `
+      <div class="result-item">
+        <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
+        <img src="${img}" alt="Card" />
+        <div class="result-text">
+          <strong>$${price.toFixed(2)}</strong><br />${title}
+        </div>
+      </div>
+    `;
+  });
+
+  results.insertAdjacentHTML('beforeend', html);
+
+  itemsShown += items.length;
+  if (itemsShown < fullItemList.length) {
+    loadMore.style.display = 'block';
+  } else {
+    loadMore.style.display = 'none';
+  }
+}
+
+function updateOfferCalc() {
+  const slider = document.getElementById('slider');
+  const val = parseInt(slider.value);
+  document.getElementById('sliderDisplay').textContent = `${val}%`;
+
+  const checkboxes = document.querySelectorAll('input[type="checkbox"][data-price]');
+  let total = 0, count = 0;
+
+  checkboxes.forEach(cb => {
+    if (cb.checked) {
+      total += parseFloat(cb.dataset.price);
+      count++;
+    }
+  });
+
+  const offerOutput = document.getElementById('offerOutput');
+  if (count === 0) {
+    offerOutput.textContent = 'Select comps to calculate average.';
+    return;
+  }
+
+  const average = total / count;
+  const offer = (average * val / 100).toFixed(2);
+  offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${val}% Offer: $${offer}`;
+}
 </script>
+
 </body>
 </html>
