@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flipperz – Brought to you by NUMBERED</title>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Flipperz Sold Listings</title>
   <style>
     body {
       font-family: 'Manrope', sans-serif;
@@ -74,7 +73,6 @@
   </style>
 </head>
 <body>
-
 <div class="container">
   <img src="flipperz-logo.png" alt="Flipperz Logo" style="width: 240px; height: auto; margin-bottom: 16px;" />
   <input id="searchInput" type="text" placeholder="Search any card, set, or product" />
@@ -91,9 +89,6 @@
 </div>
 
 <script>
-const EBAY_APP_ID = 'Numbered-Flipperz-PRD-b0e716b3d-f74e52e3'; // <-- your real APP ID
-const PROXY_URL = 'https://flipperz-pied.vercel.app/'; // <-- your real proxy URL
-
 let fullItemList = [];
 let itemsShown = 0;
 
@@ -112,13 +107,17 @@ async function runSearch() {
   }
 
   try {
-    // Notice: NO AppID inside this URL now
-    const ebayApiUrl = `https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=${encodeURIComponent(query)}&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true&sortOrder=EndTimeNewest&paginationInput.entriesPerPage=10`;
+    const ebayApiUrl = `https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=Numbered-Flipperz-PRD-b0e716b3d-f74e52e3&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=${encodeURIComponent(query)}&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true&sortOrder=EndTimeNewest&paginationInput.entriesPerPage=10`;
 
     const proxyUrl = `https://flipperz-pied.vercel.app/api/proxy?url=${encodeURIComponent(ebayApiUrl)}`;
-    
+
     const response = await fetch(proxyUrl);
     const data = await response.json();
+
+    if (!data.findCompletedItemsResponse || data.findCompletedItemsResponse[0].ack[0] !== 'Success') {
+      results.innerHTML = '<p style="color:#f66;">eBay API error. Check AppID or quota limits.</p>';
+      return;
+    }
 
     const items = data.findCompletedItemsResponse?.[0]?.searchResult?.[0]?.item || [];
 
@@ -129,6 +128,7 @@ async function runSearch() {
 
     fullItemList = items;
     loadNextPage();
+
   } catch (err) {
     console.error(err);
     results.innerHTML = '<p style="color:#f66;">Error fetching results. Try again later.</p>';
@@ -139,6 +139,7 @@ function loadNextPage() {
   const results = document.getElementById('results');
   const loadMore = document.getElementById('loadMore');
   let html = '';
+
   const items = fullItemList.slice(itemsShown, itemsShown + 10);
 
   items.forEach(item => {
@@ -195,6 +196,5 @@ function updateOfferCalc() {
   offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${val}% Offer: $${offer}`;
 }
 </script>
-
 </body>
 </html>
