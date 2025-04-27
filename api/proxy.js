@@ -1,20 +1,32 @@
+// New FIXED proxy.js for eBay Finding API POST
+
 export default async function handler(req, res) {
-  const url = req.query.url;
+  const { url, query } = req.query;
 
-  // 💬 Fix CORS problem
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (!url) {
-    return res.status(400).json({ error: "No URL provided." });
+  if (!url || !query) {
+    return res.status(400).json({ error: "Missing URL or query." });
   }
 
   try {
     const ebayRes = await fetch(url, {
+      method: 'POST',
       headers: {
-        "X-EBAY-SOA-SECURITY-APPNAME": "Numbered-Flipperz-PRD-b0e716b3d-f74e52e3"
-      }
+        "X-EBAY-SOA-SECURITY-APPNAME": "Numbered-Flipperz-PRD-b0e716b3d-f74e52e3",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        keywords: query,
+        itemFilter: [
+          {
+            name: "SoldItemsOnly",
+            value: true
+          }
+        ],
+        sortOrder: "EndTimeNewest",
+        paginationInput: {
+          entriesPerPage: 10
+        }
+      })
     });
 
     if (!ebayRes.ok) {
@@ -23,6 +35,7 @@ export default async function handler(req, res) {
 
     const data = await ebayRes.json();
     res.status(200).json(data);
+
   } catch (error) {
     console.error("Proxy error:", error);
     res.status(500).json({ error: "Proxy request failed." });
