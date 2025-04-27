@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flipperz – Powered by NUMBERED</title>
+  <title>Flipperz – Sold Listings Search</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -12,12 +12,12 @@
       color: white;
       margin: 0;
       padding: 0 16px;
+      text-align: center;
     }
     .container {
       max-width: 720px;
       margin: auto;
       padding: 32px 0;
-      text-align: center;
     }
     #searchInput {
       width: 90%;
@@ -75,10 +75,10 @@
 </head>
 <body>
 <div class="container">
-  <img src="flipperz-logo.png" alt="Flipperz Logo" style="width: 240px; height: auto; margin-bottom: 16px;" />
-  <input id="searchInput" type="text" placeholder="Search any card, set, or product" />
-  <br />
-  <button onclick="runSearch()">Search eBay Sold Listings</button>
+  <img src="flipperz-logo.png" alt="Flipperz Logo" style="width: 240px; height: auto; margin-bottom: 16px;">
+  <input id="searchInput" type="text" placeholder="Search any card, set, or product">
+  <br>
+  <button id="searchButton" onclick="runSearch()">Search eBay Sold Listings</button>
 
   <div style="margin-top:24px;">Adjust Offer %: <span id="sliderDisplay">80%</span></div>
   <input type="range" id="slider" min="60" max="100" step="5" value="80" oninput="updateOfferCalc()">
@@ -92,8 +92,16 @@
 <script>
 let fullItemList = [];
 let itemsShown = 0;
+let lastSearchTime = 0;
 
 async function runSearch() {
+  const now = Date.now();
+  if (now - lastSearchTime < 5000) {
+    alert('Please wait a few seconds before searching again.');
+    return;
+  }
+  lastSearchTime = now;
+
   const query = document.getElementById('searchInput').value.trim();
   const results = document.getElementById('results');
   const loadMore = document.getElementById('loadMore');
@@ -108,18 +116,23 @@ async function runSearch() {
   }
 
   try {
-    const ebayApiUrl = `https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=Numbered-Flipperz-PRD-b0e716b3d-f74e52e3&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=${encodeURIComponent(query)}&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true&sortOrder=EndTimeNewest&paginationInput.entriesPerPage=20`;
+    const ebayApiUrl = `https://svcs.ebay.com/services/search/FindingService/v1?
+      OPERATION-NAME=findCompletedItems&
+      SERVICE-VERSION=1.0.0&
+      RESPONSE-DATA-FORMAT=JSON&
+      REST-PAYLOAD&
+      keywords=${encodeURIComponent(query)}&
+      itemFilter(0).name=SoldItemsOnly&
+      itemFilter(0).value=true&
+      sortOrder=EndTimeNewest&
+      paginationInput.entriesPerPage=10
+    `.replace(/\n|\s+/g, '');
 
-    const proxyUrl = 'https://flipperz-pied.vercel.app/api/proxy';
-    const response = await fetch(proxyUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ url: ebayApiUrl })
-    });
+    const proxyUrl = `https://flipperz-pied.vercel.app/api/proxy?url=${encodeURIComponent(ebayApiUrl)}`;
 
+    const response = await fetch(proxyUrl);
     const data = await response.json();
+
     const items = data.findCompletedItemsResponse?.[0]?.searchResult?.[0]?.item || [];
 
     if (!items.length) {
@@ -142,8 +155,8 @@ function loadNextPage() {
   const items = fullItemList.slice(itemsShown, itemsShown + 10);
 
   items.forEach(item => {
-    const title = item.title || 'No title';
-    const img = item.galleryURL || 'https://via.placeholder.com/80';
+    const title = item.title?.[0] || 'No title';
+    const img = item.galleryURL?.[0] || 'https://via.placeholder.com/80';
     const price = item.sellingStatus?.[0]?.currentPrice?.[0]?.__value__ || 0;
     const soldDate = item.listingInfo?.[0]?.endTime ? new Date(item.listingInfo[0].endTime).toLocaleDateString() : 'Unknown';
 
@@ -151,11 +164,11 @@ function loadNextPage() {
 
     html += `
       <div class="result-item">
-        <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
-        <img src="${img}" alt="Card" />
+        <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()">
+        <img src="${img}" alt="Card">
         <div class="result-text">
-          <strong>$${parseFloat(price).toFixed(2)}</strong><br />
-          ${title}<br />
+          <strong>$${parseFloat(price).toFixed(2)}</strong><br>
+          ${title}<br>
           <small>Sold: ${soldDate}</small>
         </div>
       </div>
@@ -165,11 +178,7 @@ function loadNextPage() {
   results.insertAdjacentHTML('beforeend', html);
 
   itemsShown += items.length;
-  if (itemsShown < fullItemList.length) {
-    loadMore.style.display = 'block';
-  } else {
-    loadMore.style.display = 'none';
-  }
+  loadMore.style.display = (itemsShown < fullItemList.length) ? 'block' : 'none';
 }
 
 function updateOfferCalc() {
