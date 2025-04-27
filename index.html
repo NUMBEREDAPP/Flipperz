@@ -92,8 +92,8 @@
 <script>
 let fullItemList = [];
 let itemsShown = 0;
-
 <script>
+
 async function runSearch() {
   const query = document.getElementById('searchInput').value.trim();
   const results = document.getElementById('results');
@@ -130,6 +130,70 @@ async function runSearch() {
     results.innerHTML = '<p style="color:#f66;">Error fetching results. Try again later.</p>';
   }
 }
+
+function loadNextPage() {
+  const results = document.getElementById('results');
+  const loadMore = document.getElementById('loadMore');
+  let html = '';
+  const items = fullItemList.slice(itemsShown, itemsShown + 10);
+
+  items.forEach(item => {
+    const title = item.title || 'No title';
+    const img = item.galleryURL || 'https://via.placeholder.com/80';
+    const price = item.sellingStatus?.[0]?.currentPrice?.[0]?.__value__ || 0;
+    const soldDate = item.listingInfo?.[0]?.endTime ? new Date(item.listingInfo[0].endTime).toLocaleDateString() : 'Unknown';
+
+    if (!price) return;
+
+    html += `
+      <div class="result-item">
+        <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
+        <img src="${img}" alt="Card" />
+        <div class="result-text">
+          <strong>$${parseFloat(price).toFixed(2)}</strong><br />
+          ${title}<br />
+          <small>Sold: ${soldDate}</small>
+        </div>
+      </div>
+    `;
+  });
+
+  results.insertAdjacentHTML('beforeend', html);
+
+  itemsShown += items.length;
+  if (itemsShown < fullItemList.length) {
+    loadMore.style.display = 'block';
+  } else {
+    loadMore.style.display = 'none';
+  }
+}
+
+function updateOfferCalc() {
+  const slider = document.getElementById('slider');
+  const val = parseInt(slider.value);
+  document.getElementById('sliderDisplay').textContent = `${val}%`;
+
+  const checkboxes = document.querySelectorAll('input[type="checkbox"][data-price]');
+  let total = 0, count = 0;
+
+  checkboxes.forEach(cb => {
+    if (cb.checked) {
+      total += parseFloat(cb.dataset.price);
+      count++;
+    }
+  });
+
+  const offerOutput = document.getElementById('offerOutput');
+  if (count === 0) {
+    offerOutput.textContent = 'Select comps to calculate average.';
+    return;
+  }
+
+  const average = total / count;
+  const offer = (average * val / 100).toFixed(2);
+  offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${val}% Offer: $${offer}`;
+}
+
 </script>
 
 function loadNextPage() {
