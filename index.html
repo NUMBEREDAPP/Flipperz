@@ -62,6 +62,10 @@
       width: 300px;
       margin-top: 20px;
     }
+    #loadMore {
+      margin: 20px auto;
+      display: none;
+    }
     .output {
       margin-top: 10px;
       font-size: 1em;
@@ -82,15 +86,22 @@
   <div class="output" id="offerOutput">Select comps to calculate average.</div>
 
   <div id="results"></div>
+  <button id="loadMore" onclick="loadNextPage()">Load More</button>
 </div>
 
 <script>
-const PRODUCTION_OAUTH_TOKEN = 'v^1.1#i^1#I^3#p^3#r^0#f^0#t^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';
+const EBAY_APP_ID = 'Numbered-Flipperz-PRD-b0e716b3d-f74e52e3';
+let fullItemList = [];
+let itemsShown = 0;
 
 async function runSearch() {
   const query = document.getElementById('searchInput').value.trim();
   const results = document.getElementById('results');
+  const loadMore = document.getElementById('loadMore');
   results.innerHTML = '';
+  fullItemList = [];
+  itemsShown = 0;
+  loadMore.style.display = 'none';
 
   if (!query) {
     results.innerHTML = '<p style="color:#888;">Please enter a search term.</p>';
@@ -98,50 +109,58 @@ async function runSearch() {
   }
 
   try {
-    const response = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?q=${encodeURIComponent(query)}&filter=buyingOptions:{FIXED_PRICE}&limit=20`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${PRODUCTION_OAUTH_TOKEN}`,
-        'Content-Type': 'application/json',
-        'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
-      }
-    });
+    const url = `https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=${EBAY_APP_ID}&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=${encodeURIComponent(query)}&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true&sortOrder=EndTimeNewest&paginationInput.entriesPerPage=20`;
 
-    if (!response.ok) throw new Error('Fetch error: ' + response.status);
-
+    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`);
     const data = await response.json();
 
-    if (!data.itemSummaries || data.itemSummaries.length === 0) {
+    const items = data.findCompletedItemsResponse[0].searchResult[0].item || [];
+
+    fullItemList = items;
+
+    if (!fullItemList.length) {
       results.innerHTML = '<p style="color:#888;">No sold listings found. Try a different search.</p>';
       return;
     }
 
-    let html = '';
-
-    data.itemSummaries.forEach(item => {
-      const title = item.title || 'No title';
-      const img = item.image?.imageUrl || 'https://via.placeholder.com/80';
-      const price = item.price?.value ? parseFloat(item.price.value) : 0;
-
-      if (!price) return;
-
-      html += `
-        <div class="result-item">
-          <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
-          <img src="${img}" alt="Card" />
-          <div class="result-text">
-            <strong>$${price.toFixed(2)}</strong><br />${title}
-          </div>
-        </div>
-      `;
-    });
-
-    results.innerHTML = html;
-    updateOfferCalc();
-
+    loadNextPage();
   } catch (err) {
     console.error(err);
     results.innerHTML = '<p style="color:#f66;">Error fetching results. Try again later.</p>';
+  }
+}
+
+function loadNextPage() {
+  const results = document.getElementById('results');
+  const loadMore = document.getElementById('loadMore');
+  let html = '';
+  const items = fullItemList.slice(itemsShown, itemsShown + 10);
+
+  items.forEach(item => {
+    const title = item.title[0] || 'No title';
+    const img = item.galleryURL ? item.galleryURL[0] : 'https://via.placeholder.com/80';
+    const price = parseFloat(item.sellingStatus[0].currentPrice[0].__value__) || 0;
+
+    if (!price) return;
+
+    html += `
+      <div class="result-item">
+        <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
+        <img src="${img}" alt="Card" />
+        <div class="result-text">
+          <strong>$${price.toFixed(2)}</strong><br />${title}
+        </div>
+      </div>
+    `;
+  });
+
+  results.insertAdjacentHTML('beforeend', html);
+  itemsShown += items.length;
+
+  if (itemsShown < fullItemList.length) {
+    loadMore.style.display = 'block';
+  } else {
+    loadMore.style.display = 'none';
   }
 }
 
@@ -171,6 +190,5 @@ function updateOfferCalc() {
   offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${val}% Offer: $${offer}`;
 }
 </script>
-
 </body>
 </html>
