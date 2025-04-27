@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flipperz - Comp Tracker</title>
+  <title>Flipperz – Brought to you by NUMBERED</title>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body {
@@ -59,26 +59,10 @@
       margin-top: 8px;
     }
     #slider {
-      -webkit-appearance: none;
-      width: 100%;
-      max-width: 300px;
-      height: 8px;
-      background: #333;
-      border-radius: 6px;
-      outline: none;
-      margin-top: 24px;
+      width: 300px;
+      margin: 20px auto;
     }
-    #slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px;
-      height: 30px;
-      border-radius: 4px;
-      background: #00cc6a;
-      cursor: pointer;
-      transform: translateY(-12px);
-      border: none;
-    }
-    #offerOutput {
+    .output {
       margin-top: 10px;
       font-size: 1em;
       font-weight: 600;
@@ -86,21 +70,27 @@
   </style>
 </head>
 <body>
-<div class="container">
-  <img src="flipperz-logo.png" alt="Flipperz Logo" style="width: 240px; height: auto; margin-bottom: 16px;">
-  <input id="searchInput" type="text" placeholder="Search any card, set, or product">
-  <br>
-  <button onclick="runSearch()">Search eBay Sold Listings</button>
-  <div style="margin-top: 24px;">Adjust Offer %: <span id="sliderDisplay">80%</span></div>
-  <input type="range" id="slider" min="60" max="100" step="5" value="80" oninput="updateOfferCalc()">
-  <div id="offerOutput">Select comps to calculate average.</div>
-  <div id="results"></div>
-  <button id="loadMore" onclick="loadNextPage()" style="display:none; margin-top:20px;">Load More</button>
-</div>
+  <div class="container">
+    <img src="flipperz-logo.png" alt="Flipperz Logo" style="width: 240px; height: auto; margin-bottom: 16px;" />
+    <input id="searchInput" type="text" placeholder="Search any card, set, or product" />
+    <br />
+    <button onclick="runSearch()">Search eBay Sold Listings</button>
+
+    <div>
+      <div style="margin-top: 24px;">Adjust Offer %: <span id="sliderDisplay">85%</span></div>
+      <input type="range" id="slider" min="60" max="100" step="5" value="85" oninput="updateOfferCalc()">
+      <div class="output" id="offerOutput">Select comps to calculate average.</div>
+    </div>
+
+    <div id="results"></div>
+    <button id="loadMore" style="display:none;" onclick="loadNextPage()">Load More</button>
+  </div>
 
 <script>
 let fullItemList = [];
 let itemsShown = 0;
+
+const EBAY_APP_ID = "Numbered-Flipperz-PRD-b0e716b3d-f74e52e3"; // Production AppID
 
 async function runSearch() {
   const query = document.getElementById('searchInput').value.trim();
@@ -116,7 +106,7 @@ async function runSearch() {
     return;
   }
 
-  const findingUrl = `https://corsproxy.io/?${encodeURIComponent('https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=tbuc4228-b7c9-4d94-9d8c-b2c939f644c0&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=' + query + '&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true&sortOrder=EndTimeNewest&paginationInput.entriesPerPage=50')}`;
+  const findingUrl = `https://svcs.ebay.com/services/search/FindingService/v1?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0&SECURITY-APPNAME=${EBAY_APP_ID}&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD&keywords=${encodeURIComponent(query)}&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true&sortOrder=EndTimeNewest&paginationInput.entriesPerPage=50`;
 
   try {
     const response = await fetch(findingUrl);
@@ -140,9 +130,9 @@ async function runSearch() {
 function loadNextPage() {
   const results = document.getElementById('results');
   const loadMore = document.getElementById('loadMore');
-  let html = '';
 
-  fullItemList.slice(itemsShown, itemsShown + 10).forEach(item => {
+  const items = fullItemList.slice(itemsShown, itemsShown + 10);
+  items.forEach(item => {
     const title = item.title?.[0] || 'No title';
     const img = item.galleryURL?.[0] || 'https://via.placeholder.com/80';
     const price = parseFloat(item.sellingStatus?.[0]?.currentPrice?.[0]?.__value__) || 0;
@@ -150,26 +140,20 @@ function loadNextPage() {
 
     if (!price) return;
 
-    html += `
+    results.innerHTML += `
       <div class="result-item">
-        <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()">
-        <img src="${img}" alt="Card">
+        <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()" />
+        <img src="${img}" alt="Card" />
         <div class="result-text">
-          <strong>$${price.toFixed(2)}</strong><br>${title}<br>
+          <strong>$${price.toFixed(2)}</strong><br />${title}<br />
           <small>Sold: ${soldDate}</small>
         </div>
       </div>
     `;
   });
 
-  results.insertAdjacentHTML('beforeend', html);
-  itemsShown += 10;
-
-  if (itemsShown < fullItemList.length) {
-    loadMore.style.display = 'block';
-  } else {
-    loadMore.style.display = 'none';
-  }
+  itemsShown += items.length;
+  loadMore.style.display = (itemsShown < fullItemList.length) ? 'block' : 'none';
 }
 
 function updateOfferCalc() {
@@ -179,7 +163,6 @@ function updateOfferCalc() {
 
   const checkboxes = document.querySelectorAll('input[type="checkbox"][data-price]');
   let total = 0, count = 0;
-
   checkboxes.forEach(cb => {
     if (cb.checked) {
       total += parseFloat(cb.dataset.price);
@@ -198,5 +181,6 @@ function updateOfferCalc() {
   offerOutput.textContent = `Average of ${count} comps: $${average.toFixed(2)} → ${val}% Offer: $${offer}`;
 }
 </script>
+
 </body>
 </html>
