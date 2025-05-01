@@ -1,26 +1,36 @@
+// api/proxy.js
+
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: "Method Not Allowed" });
-  }
+  const { query } = req;
+  const keywords = query.q || '';
 
-  const { url } = req.body; // POST body, not query
+  const token = process.env.EBAY_ACCESS_TOKEN; // or however you store it
 
-  if (!url) {
-    return res.status(400).json({ error: "No URL provided." });
-  }
-
-  try {
-    const ebayRes = await fetch(url, {
-      headers: {
-        "X-EBAY-SOA-SECURITY-APPNAME": "Numbered-Flipperz-PRD-b0e716b3d-f74e52e3",
-        "Content-Type": "application/json",
-      },
+  const url = 'https://svcs.ebay.com/services/search/FindingService/v1?' +
+    new URLSearchParams({
+      'OPERATION-NAME': 'findCompletedItems',
+      'SERVICE-VERSION': '1.0.0',
+      'RESPONSE-DATA-FORMAT': 'JSON',
+      'REST-PAYLOAD': 'true',
+      'keywords': keywords,
+      'paginationInput.entriesPerPage': '10',
+      'itemFilter(0).name': 'SoldItemsOnly',
+      'itemFilter(0).value': 'true',
+      'sortOrder': 'EndTimeNewest'
     });
 
-    const data = await ebayRes.json();
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`, // 🔐 this is new
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await response.json();
     res.status(200).json(data);
-  } catch (error) {
-    console.error("Proxy error:", error);
-    res.status(500).json({ error: "Proxy request failed." });
+  } catch (err) {
+    console.error('Fetch error:', err);
+    res.status(500).json({ error: 'Failed to fetch eBay results' });
   }
 }
