@@ -11,27 +11,31 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const { url } = req.body;
+  if (!url) {
+    return res.status(400).json({ error: 'Missing eBay query URL' });
+  }
+
+  const tokenJson = process.env.EBAY_ACCESS_TOKEN;
+  if (!tokenJson) {
+    return res.status(500).json({ error: 'Missing eBay access token' });
+  }
+
+  const token = JSON.parse(tokenJson).access_token;
+
   try {
-    const { url } = req.body;
-
-    if (!url) {
-      return res.status(400).json({ error: 'Missing target URL' });
-    }
-
-    const token = process.env.EBAY_ACCESS_TOKEN;
-
-    const response = await fetch(decodeURIComponent(url), {
+    const response = await fetch(url, {
+      method: 'GET',
       headers: {
-        Authorization: `Bearer ${JSON.parse(token).access_token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
 
     const data = await response.json();
     res.status(response.ok ? 200 : response.status).json(data);
-
-  } catch (error) {
-    console.error('Proxy error:', error);
-    res.status(500).json({ error: 'Proxy request failed', details: error.message });
+  } catch (err) {
+    console.error('Proxy error:', err);
+    res.status(500).json({ error: 'Proxy request failed', details: err.message });
   }
 }
