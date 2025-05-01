@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   }
 
   const clientId = 'Numbered-Flipperz-PRD-b0e716b3d-f74e52e3';
-  const clientSecret = process.env.EBAY_CLIENT_SECRET;
+  const clientSecret = process.env.PRD-0e716b3d8506-dd47-421f-84fa-34ed;
   const redirectUri = 'Numbered_Tech__-Numbered-Flippe-uvyrzbbmf';
 
   const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
