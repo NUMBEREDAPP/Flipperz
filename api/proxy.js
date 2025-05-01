@@ -21,7 +21,12 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Missing eBay access token' });
   }
 
-  const token = JSON.parse(tokenJson).access_token;
+  let token;
+  try {
+    token = JSON.parse(tokenJson).access_token;
+  } catch (e) {
+    return res.status(500).json({ error: 'Invalid token format' });
+  }
 
   try {
     const response = await fetch(url, {
