@@ -14,13 +14,14 @@ export default async function handler(req, res) {
 
   const token = process.env.EBAY_ACCESS_TOKEN;
   if (!token) {
-    return res.status(500).json({ error: 'Missing access token' });
+    return res.status(500).json({ error: 'Missing eBay access token' });
   }
 
   try {
     const response = await fetch(decodeURIComponent(query), {
+      method: 'GET',
       headers: {
-        Authorization: `Bearer ${JSON.parse(token).access_token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
@@ -29,6 +30,6 @@ export default async function handler(req, res) {
     res.status(response.ok ? 200 : response.status).json(data);
   } catch (err) {
     console.error('Proxy error:', err);
-    res.status(500).json({ error: 'Proxy failed', details: err.message });
+    res.status(500).json({ error: 'Proxy request failed', details: err.message });
   }
 }
