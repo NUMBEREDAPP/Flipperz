@@ -21,15 +21,15 @@ export default async function handler(req, res) {
     const response = await fetch(decodeURIComponent(query), {
       method: 'GET',
       headers: {
-        'X-EBAY-API-APP-ID': appId,
-        'Content-Type': 'application/json',
-      },
+        'X-EBAY-SOA-SECURITY-APPNAME': appId,
+        'Content-Type': 'application/json'
+      }
     });
 
     const data = await response.json();
     return res.status(response.ok ? 200 : response.status).json(data);
   } catch (err) {
-    console.error('Proxy error:', err);
+    console.error('Proxy fetch failed:', err);
     return res.status(500).json({ error: 'Proxy request failed', details: err.message });
   }
 }
