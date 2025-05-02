@@ -7,29 +7,25 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { url } = req.body;
-  if (!url) {
+  const query = req.method === 'POST' ? req.body.url : req.query.url;
+  if (!query) {
     return res.status(400).json({ error: 'Missing eBay query URL' });
   }
 
-  const tokenJson = process.env.EBAY_ACCESS_TOKEN;
-  if (!tokenJson) {
-    return res.status(500).json({ error: 'Missing eBay access token' });
+  const rawToken = process.env.EBAY_ACCESS_TOKEN;
+  if (!rawToken) {
+    return res.status(500).json({ error: 'Missing access token' });
   }
 
   let token;
   try {
-    token = JSON.parse(tokenJson).access_token;
-  } catch (e) {
-    return res.status(500).json({ error: 'Invalid token format' });
+    token = JSON.parse(rawToken).access_token;
+  } catch (err) {
+    return res.status(500).json({ error: 'Token parse failed', details: err.message });
   }
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch(decodeURIComponent(query), {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -38,9 +34,9 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    res.status(response.ok ? 200 : response.status).json(data);
+    return res.status(response.ok ? 200 : response.status).json(data);
   } catch (err) {
     console.error('Proxy error:', err);
-    res.status(500).json({ error: 'Proxy request failed', details: err.message });
+    return res.status(500).json({ error: 'Proxy request failed', details: err.message });
   }
 }
