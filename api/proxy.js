@@ -24,14 +24,22 @@ export default async function handler(req, res) {
       'Content-Type': 'application/json'
     };
 
+    let usedToken = false;
+
     if (token) {
       try {
         const parsed = JSON.parse(token);
-        headers['X-EBAY-API-IAF-TOKEN'] = parsed.access_token;
+        if (parsed.access_token) {
+          headers['X-EBAY-API-IAF-TOKEN'] = parsed.access_token;
+          usedToken = true;
+        }
       } catch (e) {
         headers['X-EBAY-API-IAF-TOKEN'] = token;
+        usedToken = true;
       }
-    } else {
+    }
+
+    if (!usedToken) {
       headers['X-EBAY-SOA-SECURITY-APPNAME'] = appId;
     }
 
