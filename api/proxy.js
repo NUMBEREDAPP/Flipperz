@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -12,24 +12,38 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing eBay query URL' });
   }
 
-  const appId = process.env.EBAY_APP_ID;
-  if (!appId) {
-    return res.status(500).json({ error: 'Missing eBay App ID' });
+  const token = process.env.EBAY_ACCESS_TOKEN;
+  const appId = process.env.EBAY_APP_ID || 'Numbered-Flipperz-PRD-b0e716b3d-f74e52e3';
+
+  if (!token && !appId) {
+    return res.status(500).json({ error: 'Missing eBay App ID or token' });
   }
 
   try {
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+
+    if (token) {
+      try {
+        const parsed = JSON.parse(token);
+        headers['X-EBAY-API-IAF-TOKEN'] = parsed.access_token;
+      } catch (e) {
+        headers['X-EBAY-API-IAF-TOKEN'] = token;
+      }
+    } else {
+      headers['X-EBAY-SOA-SECURITY-APPNAME'] = appId;
+    }
+
     const response = await fetch(decodeURIComponent(query), {
       method: 'GET',
-      headers: {
-        'X-EBAY-SOA-SECURITY-APPNAME': appId,
-        'Content-Type': 'application/json'
-      }
+      headers
     });
 
     const data = await response.json();
     return res.status(response.ok ? 200 : response.status).json(data);
   } catch (err) {
-    console.error('Proxy fetch failed:', err);
+    console.error('Proxy error:', err);
     return res.status(500).json({ error: 'Proxy request failed', details: err.message });
   }
 }
