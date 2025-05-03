@@ -45,14 +45,21 @@ async function runSearch() {
     }
 
     try {
+        const ebayApiUrl = `https://svcs.ebay.com/services/search/FindingService/v1`
+            + `?OPERATION-NAME=findCompletedItems&SERVICE-VERSION=1.0.0`
+            + `&RESPONSE-DATA-FORMAT=JSON&REST-PAYLOAD`
+            + `&keywords=${encodeURIComponent(query)}`
+            + `&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true`
+            + `&sortOrder=EndTimeNewest&paginationInput.entriesPerPage=10`;
+
         const response = await fetch('https://flipperz-pied.vercel.app/api/proxy', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query })
+            body: JSON.stringify({ url: ebayApiUrl })
         });
 
         const data = await response.json();
-        const items = data.itemSummaries || [];
+        const items = data.findCompletedItemsResponse?.[0]?.searchResult?.[0]?.item || [];
 
         if (!items.length) {
             results.innerHTML = '<p style="color:#888;">No sold listings found. Try a different search.</p>';
@@ -74,20 +81,23 @@ function loadNextPage() {
     const items = fullItemList.slice(itemsShown, itemsShown + 10);
 
     items.forEach(item => {
-        const title = item.title || 'No title';
-        const img = item.image?.imageUrl || 'https://via.placeholder.com/80';
-        const price = item.price?.value || '0.00';
-        const url = item.itemWebUrl || '#';
-        const date = item.itemEndDate ? new Date(item.itemEndDate).toLocaleDateString() : 'Unknown';
+        const title = item.title?.[0] || 'No title';
+        const img = item.galleryURL?.[0] || 'https://via.placeholder.com/80';
+        const price = item.sellingStatus?.[0]?.currentPrice?.[0]?.__value__ || 0;
+        const soldDate = item.listingInfo?.[0]?.endTime ? new Date(item.listingInfo[0].endTime).toLocaleDateString() : 'Unknown';
+
+        if (!price) return;
 
         html += `
             <div class="result-item">
                 <input type="checkbox" data-price="${price}" onchange="updateOfferCalc()">
                 <img src="${img}" alt="Card">
                 <div class="result-text">
-                    <strong>$${parseFloat(price).toFixed(2)}</strong><br>
+                    <strong>
+                        $${parseFloat(price).toFixed(2)}
+                    </strong><br>
                     ${title}<br>
-                    <small>Sold: ${date}</small>
+                    <small>Sold: ${soldDate}</small>
                 </div>
             </div>
         `;
