@@ -1,3 +1,4 @@
+// This handler is deprecated since we now use public eBay search and no longer need the proxy
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
@@ -5,33 +6,13 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const query = req.method === 'POST' ? req.body.query : req.query.query;
-  const appId = process.env.EBAY_APP_ID;
-
-  const url = `https://svcs.ebay.com/services/search/FindingService/v1`
-    + `?OPERATION-NAME=findCompletedItems`
-    + `&SERVICE-VERSION=1.0.0`
-    + `&SECURITY-APPNAME=${appId}`
-    + `&RESPONSE-DATA-FORMAT=JSON`
-    + `&keywords=${encodeURIComponent(query || '')}`
-    + `&itemFilter(0).name=SoldItemsOnly&itemFilter(0).value=true`
-    + `&sortOrder=EndTimeNewest`
-    + `&paginationInput.entriesPerPage=10`;
+  const query = req.method === 'POST' ? req.body.url : req.query.url;
 
   if (!query) {
-    return res.status(400).json({ error: 'Missing search query', constructedUrl: url });
+    return res.status(400).json({ error: 'Missing search query' });
   }
 
-  if (!appId) {
-    return res.status(500).json({ error: 'Missing eBay App ID', constructedUrl: url });
-  }
+  const searchUrl = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(query)}&_sacat=0&_from=R40&LH_Sold=1&LH_Complete=1&_sop=13`;
 
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    res.status(response.ok ? 200 : response.status).json({ ...data, constructedUrl: url });
-  } catch (err) {
-    console.error('Proxy error:', err);
-    res.status(500).json({ error: 'Proxy request failed', details: err.message, constructedUrl: url });
-  }
+  return res.status(200).json({ redirectUrl: searchUrl });
 }
