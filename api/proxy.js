@@ -31,6 +31,7 @@ export default async function handler(req, res) {
     + `&paginationInput.entriesPerPage=10`;
 
   try {
+    console.log("eBay URL:", url);
     const response = await fetch(url);
     const data = await response.json();
     res.status(response.ok ? 200 : response.status).json(data);
