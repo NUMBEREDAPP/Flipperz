@@ -7,23 +7,35 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const rawUrl = req.method === 'POST' ? req.body.url : req.query.url;
-  if (!rawUrl) {
-    return res.status(400).json({ error: 'Missing eBay query URL' });
+  const query = req.method === 'POST' ? req.body.query : req.query.query;
+  if (!query) {
+    return res.status(400).json({ error: 'Missing eBay search query' });
   }
 
-  const appId = process.env.EBAY_APP_ID || 'Numbered-Flipperz-PRD-b0e716b3d-f74e52e3';
-  if (!appId) {
-    return res.status(500).json({ error: 'Missing eBay App ID' });
+  const rawToken = process.env.EBAY_ACCESS_TOKEN;
+  if (!rawToken) {
+    return res.status(500).json({ error: 'Missing access token' });
   }
 
-  // Append app ID to query string directly (Finding API requires this in the URL)
-  const urlWithAppId = rawUrl.includes('SECURITY-APPNAME=') ?
-    decodeURIComponent(rawUrl) :
-    `${decodeURIComponent(rawUrl)}&SECURITY-APPNAME=${appId}`;
+  let token;
+  try {
+    token = JSON.parse(rawToken).access_token;
+  } catch (err) {
+    return res.status(500).json({ error: 'Token parse failed', details: err.message });
+  }
+
+  const encodedQuery = encodeURIComponent(query);
+  const browseUrl = `https://api.ebay.com/buy/browse/v1/item_summary/search?q=${encodedQuery}&filter=buyingOptions:{FIXED_PRICE},price:[1..]&limit=10&sort=price DESC`; // Customize filters as needed
 
   try {
-    const response = await fetch(urlWithAppId, { method: 'GET' });
+    const response = await fetch(browseUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
     const data = await response.json();
     return res.status(response.ok ? 200 : response.status).json(data);
   } catch (err) {
